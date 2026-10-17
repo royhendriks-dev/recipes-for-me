@@ -7,5 +7,7 @@
 .layout { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); align-items: start; }
 .side { min-width: 0; }
 @media (min-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr) 320px; }
+  .layout { grid-template-columns: minmax(0, 1fr) 340px; }
+  /* terug-link (44 px) + marge (8 px) uit recipe-detail, zodat de bovenranden gelijk lopen */
+  .side.below-back { margin-top: 52px; }
 }
