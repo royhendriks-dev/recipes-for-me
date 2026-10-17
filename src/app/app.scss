@@ -1,6 +1,12 @@
-.wrap { max-width: 880px; margin: 0 auto; padding-block: 16px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 16px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 20px; }
 .brand-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; }
 .lang { min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 600; }
 .brand { color: inherit; text-decoration: none; }
+.layout { display: grid; gap: 24px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.side { min-width: 0; }
+@media (min-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr) 320px; }
+  .side { position: sticky; top: 16px; }
+}
