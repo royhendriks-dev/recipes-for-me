@@ -1,3 +1,4 @@
+<a class="back" routerLink="/">← {{ i18n.t('back') }}</a>
 @if (recipe.isLoading()) {
   <p class="state" role="status">{{ i18n.t('loading') }}</p>
 } @else if (recipe.error()) {
