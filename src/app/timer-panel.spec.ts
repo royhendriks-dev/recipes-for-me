@@ -19,48 +19,69 @@ describe('TimerPanel', () => {
     timers.timers().forEach((t) => timers.remove(t.id));
   });
 
-  it('toont een lege staat en start een eigen timer via het formulier', async () => {
+  const click = async (fixture: { whenStable(): Promise<unknown> }, el: Element | null) => {
+    (el as HTMLElement).click();
+    await fixture.whenStable();
+  };
+  const byText = (el: HTMLElement, text: string) =>
+    Array.from(el.querySelectorAll('button')).find((b) => b.textContent?.replace(/\s+/g, ' ').includes(text)) ?? null;
+
+  it('toont een lege staat en voegt een timer toe die nog niet loopt', async () => {
     const { fixture, timers, el } = await setup();
     expect(el.querySelector('.empty')).not.toBeNull();
 
-    (el.querySelector('.head button') as HTMLButtonElement).click();
-    await fixture.whenStable();
-    (el.querySelector('.chip') as HTMLButtonElement).click();
-    el.querySelector('form')?.dispatchEvent(new Event('submit'));
-    await fixture.whenStable();
-
+    await click(fixture, el.querySelector('.add'));
     expect(timers.timers()).toHaveLength(1);
-    expect(timers.timers()[0].name).toBe('Eigen timer');
-    expect(timers.timers()[0].totalSec).toBe(300);
+    expect(timers.timers()[0]).toMatchObject({ name: 'Eigen timer', totalSec: 300 });
+    expect(timers.isRunning(timers.timers()[0])).toBe(false);
     expect(el.querySelector('.time')?.textContent).toBe('05:00');
+    expect(el.querySelector('.status')?.textContent).toBe('Klaar om te starten');
   });
 
-  it('negeert een timer van nul seconden', async () => {
+  it('start, pauzeert en reset een timer', async () => {
     const { fixture, timers, el } = await setup();
-    (el.querySelector('.head button') as HTMLButtonElement).click();
+    timers.add('Pasta', 600);
     await fixture.whenStable();
-    (el.querySelector('input[type=number]') as HTMLInputElement).value = '0';
-    el.querySelector('form')?.dispatchEvent(new Event('submit'));
-    expect(timers.timers()).toHaveLength(0);
+
+    await click(fixture, el.querySelector('.go'));
+    expect(el.querySelector('.status')?.textContent).toBe('Loopt');
+    await click(fixture, el.querySelector('.go'));
+    expect(el.querySelector('.status')?.textContent).toBe('Gepauzeerd');
+
+    await click(fixture, el.querySelector('.reset'));
+    expect(el.querySelector('.status')?.textContent).toBe('Klaar om te starten');
+    expect(el.querySelector('.time')?.textContent).toBe('10:00');
   });
 
-  it('bedient een lopende timer: pauzeren, +1 min en verwijderen', async () => {
+  it('telt tijd erbij en stelt presets en eigen tijd in', async () => {
     const { fixture, timers, el } = await setup();
-    timers.start('Rijst', 600);
+    timers.add('Rijst', 300);
     await fixture.whenStable();
-    const buttons = () => Array.from(el.querySelectorAll('.timer .row button')) as HTMLButtonElement[];
-    expect(buttons().map((b) => b.textContent?.trim())).toEqual(['Pauzeren', '+1 min', 'Verwijderen']);
 
-    buttons()[0].click();
-    await fixture.whenStable();
-    expect(buttons()[0].textContent?.trim()).toBe('Hervatten');
+    await click(fixture, byText(el, '+5m'));
+    expect(el.querySelector('.time')?.textContent).toBe('10:00');
 
-    buttons()[1].click();
-    await fixture.whenStable();
-    expect(el.querySelector('.time')?.textContent).toBe('11:00');
+    await click(fixture, byText(el, '3m'));
+    expect(el.querySelector('.time')?.textContent).toBe('03:00');
 
-    buttons()[2].click();
+    const [min, sec] = Array.from(el.querySelectorAll('.custom input')) as HTMLInputElement[];
+    min.value = '2';
+    sec.value = '30';
+    await click(fixture, byText(el, 'Instellen'));
+    expect(el.querySelector('.time')?.textContent).toBe('02:30');
+  });
+
+  it('hernoemt en verwijdert een timer', async () => {
+    const { fixture, timers, el } = await setup();
+    timers.add('Rijst', 300);
     await fixture.whenStable();
+
+    const name = el.querySelector('.field input') as HTMLInputElement;
+    name.value = 'Eieren';
+    name.dispatchEvent(new Event('input'));
+    expect(timers.timers()[0].name).toBe('Eieren');
+
+    await click(fixture, el.querySelector('.remove'));
     expect(timers.timers()).toHaveLength(0);
   });
 });
