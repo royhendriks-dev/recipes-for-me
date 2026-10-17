@@ -7,18 +7,45 @@
     <button class="btn" type="button" (click)="list.reload()">{{ i18n.t('retry') }}</button>
   </div>
 } @else if (list.value()?.length) {
-  <ul class="recipes">
-    @for (recipe of list.value(); track recipe.id) {
-      <li>
-        <a class="recipe" [routerLink]="['/recept', recipe.id]">
-          <span class="title">{{ recipe.title }}</span>
-          <span class="meta">
-            {{ i18n.t(recipe.category) }}@if (recipe.minutes !== null) { · {{ recipe.minutes }} {{ i18n.t('minutes') }}}
-          </span>
-        </a>
-      </li>
+  <div class="filter" role="group" [attr.aria-label]="i18n.t('filterLabel')">
+    <button type="button" [attr.aria-pressed]="filter() === null" (click)="filter.set(null)">{{ i18n.t('filterAll') }}</button>
+    @for (category of categories; track category) {
+      <button type="button" [attr.aria-pressed]="filter() === category" (click)="filter.set(category)">{{ i18n.t(category) }}</button>
     }
-  </ul>
+  </div>
+  @for (section of sections(); track section.category) {
+    <section class="section">
+      <h2>{{ i18n.t(section.category) }} <span class="count">({{ section.recipes.length }})</span></h2>
+      <ul class="recipes">
+        @for (recipe of section.recipes; track recipe.id) {
+          <li>
+            <a class="recipe" [routerLink]="['/recept', recipe.id]">
+              <span class="icon" [attr.data-category]="recipe.category" aria-hidden="true">
+                @switch (recipe.category) {
+                  @case ('main') {
+                    <svg viewBox="0 0 24 24"><path d="M3 12h18a9 9 0 0 1-18 0zM8 8c0-1.5 1.5-1.5 1.5-3M13 8c0-1.5 1.5-1.5 1.5-3" /></svg>
+                  }
+                  @case ('side') {
+                    <svg viewBox="0 0 24 24"><path d="M12 20c-4 0-7-3-7-7 4 0 7 3 7 7zM12 20c4 0 7-3 7-7-4 0-7 3-7 7zM12 20V6M12 6c-2-2-2-4 0-4s2 2 0 4z" /></svg>
+                  }
+                  @default {
+                    <svg viewBox="0 0 24 24"><path d="M5 11h14l-1.5 9h-11zM7 11a5 5 0 0 1 10 0M12 6V3" /></svg>
+                  }
+                }
+              </span>
+              <span class="text">
+                <span class="title">{{ recipe.title }}</span>
+                <span class="meta">
+                  {{ i18n.t(recipe.category) }}@if (recipe.minutes !== null) { · {{ recipe.minutes }} {{ i18n.t('minutes') }}}
+                </span>
+              </span>
+              <span class="chev" aria-hidden="true">›</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
 } @else {
   <p class="state">{{ i18n.t('noRecipes') }}</p>
 }

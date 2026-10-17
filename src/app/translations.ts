@@ -37,6 +37,8 @@ export type TranslationKey =
   | 'side'
   | 'sweet'
   | 'timers'
+  | 'filterLabel'
+  | 'filterAll'
   | 'timerStart'
   | 'timerNew'
   | 'timerName'
@@ -89,6 +91,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     notFound: 'Dit recept bestaat niet (meer).',
     optional: 'optioneel',
     notes: 'Notities',
+    filterLabel: 'Toon soort gerecht',
+    filterAll: 'Alles',
     main: 'Hoofdgerecht',
     side: 'Bijgerecht',
     sweet: 'Zoet',
@@ -144,6 +148,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     notFound: 'This recipe does not exist (any more).',
     optional: 'optional',
     notes: 'Notes',
+    filterLabel: 'Show type of dish',
+    filterAll: 'All',
     main: 'Main course',
     side: 'Side dish',
     sweet: 'Sweet',
