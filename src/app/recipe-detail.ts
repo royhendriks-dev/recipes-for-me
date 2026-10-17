@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { I18nService } from './i18n.service';
 import { formatQuantity } from './quantity';
 import { RecipeService } from './recipe.service';
+import { TimerService } from './timer.service';
 import { buildShareText } from './share';
 
 const FAVORITES_KEY = 'recipes.favorites';
@@ -33,6 +34,7 @@ function writeFavorites(ids: string[]): void {
 export class RecipeDetail {
   protected readonly i18n = inject(I18nService);
   private readonly recipes = inject(RecipeService);
+  private readonly timers = inject(TimerService);
 
   /** Komt uit de route (`recept/:id`). */
   readonly id = input.required<string>();
@@ -77,6 +79,10 @@ export class RecipeDetail {
 
   protected setServings(event: Event): void {
     this.servings.set(Number((event.target as HTMLInputElement).value));
+  }
+
+  protected startTimer(stepNumber: number, minutes: number): void {
+    this.timers.start(`${this.recipe.value()?.title ?? ''} ${this.i18n.t('steps')} ${stepNumber}`.trim(), minutes * 60);
   }
 
   protected toggleChecked(index: number): void {

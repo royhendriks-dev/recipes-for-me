@@ -28,7 +28,24 @@ export type TranslationKey =
   | 'allRecipes'
   | 'noRecipes'
   | 'listError'
-  | 'back';
+  | 'back'
+  | 'timers'
+  | 'timerStart'
+  | 'timerNew'
+  | 'timerName'
+  | 'timerDefaultName'
+  | 'timerMin'
+  | 'timerSec'
+  | 'timerPause'
+  | 'timerResume'
+  | 'timerPlusMinute'
+  | 'timerRemove'
+  | 'timerDone'
+  | 'timerReady'
+  | 'timerCancel'
+  | 'timerQuick'
+  | 'timerNone'
+  | 'timerStepLabel';
 
 export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
   nl: {
@@ -61,6 +78,23 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     noRecipes: 'Er zijn nog geen recepten.',
     listError: 'De recepten konden niet worden geladen.',
     back: 'Terug naar alle recepten',
+    timers: 'Keuken timers',
+    timerStart: 'Starten',
+    timerNew: 'Timer toevoegen',
+    timerName: 'Naam',
+    timerDefaultName: 'Eigen timer',
+    timerMin: 'Minuten',
+    timerSec: 'Seconden',
+    timerPause: 'Pauzeren',
+    timerResume: 'Hervatten',
+    timerPlusMinute: '+1 min',
+    timerRemove: 'Verwijderen',
+    timerDone: 'Klaar',
+    timerReady: 'is klaar',
+    timerCancel: 'Annuleren',
+    timerQuick: 'Snelkeuze',
+    timerNone: 'Nog geen timers. Start er een bij een stap of voeg er zelf een toe.',
+    timerStepLabel: 'Timer',
   },
   en: {
     appName: 'Recipes for me',
@@ -92,5 +126,22 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     noRecipes: 'There are no recipes yet.',
     listError: 'The recipes could not be loaded.',
     back: 'Back to all recipes',
+    timers: 'Kitchen timers',
+    timerStart: 'Start',
+    timerNew: 'Add timer',
+    timerName: 'Name',
+    timerDefaultName: 'Custom timer',
+    timerMin: 'Minutes',
+    timerSec: 'Seconds',
+    timerPause: 'Pause',
+    timerResume: 'Resume',
+    timerPlusMinute: '+1 min',
+    timerRemove: 'Remove',
+    timerDone: 'Done',
+    timerReady: 'is ready',
+    timerCancel: 'Cancel',
+    timerQuick: 'Quick pick',
+    timerNone: 'No timers yet. Start one at a step or add your own.',
+    timerStepLabel: 'Timer',
   },
 };

@@ -1,0 +1,58 @@
+<section class="panel" [attr.aria-label]="i18n.t('timers')">
+  <div class="head">
+    <h2>{{ i18n.t('timers') }}</h2>
+    @if (!adding()) {
+      <button class="btn small" type="button" (click)="adding.set(true)">+ {{ i18n.t('timerNew') }}</button>
+    }
+  </div>
+
+  @if (adding()) {
+    <form class="editor" (submit)="$event.preventDefault(); startCustom(name.value, min.value, sec.value)">
+      <label>{{ i18n.t('timerName') }} <input #name type="text" maxlength="30" [value]="i18n.t('timerDefaultName')" /></label>
+      <div class="dial">
+        <label>{{ i18n.t('timerMin') }} <input #min type="number" min="0" max="180" inputmode="numeric" value="5" /></label>
+        <label>{{ i18n.t('timerSec') }} <input #sec type="number" min="0" max="59" inputmode="numeric" value="0" /></label>
+      </div>
+      <div class="chips" role="group" [attr.aria-label]="i18n.t('timerQuick')">
+        @for (preset of presets; track preset) {
+          <button class="chip" type="button" (click)="min.value = '' + preset; sec.value = '0'">{{ preset }} min</button>
+        }
+      </div>
+      <div class="row">
+        <button class="btn" type="submit">{{ i18n.t('timerStart') }}</button>
+        <button class="btn ghost" type="button" (click)="adding.set(false)">{{ i18n.t('timerCancel') }}</button>
+      </div>
+    </form>
+  }
+
+  @if (timerService.timers().length) {
+    <ul class="timers">
+      @for (timer of timerService.timers(); track timer.id) {
+        <li class="timer" [class.ready]="timerService.isDone(timer)">
+          <div class="line">
+            <span class="name">{{ timer.name }}</span>
+            <span class="time">{{ timerService.isDone(timer) ? i18n.t('timerDone') : format(timer) }}</span>
+          </div>
+          <div class="bar" aria-hidden="true"><i [style.width.%]="progress(timer)"></i></div>
+          <div class="row">
+            @if (!timerService.isDone(timer)) {
+              <button type="button" (click)="timerService.toggle(timer.id)">
+                {{ timerService.isRunning(timer) ? i18n.t('timerPause') : i18n.t('timerResume') }}
+              </button>
+              <button type="button" (click)="timerService.addMinute(timer.id)">{{ i18n.t('timerPlusMinute') }}</button>
+            }
+            <button type="button" (click)="timerService.remove(timer.id)">{{ i18n.t('timerRemove') }}</button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else if (!adding()) {
+    <p class="empty">{{ i18n.t('timerNone') }}</p>
+  }
+
+  <p class="visually-hidden" role="status">
+    @if (timerService.finished()) {
+      {{ timerService.finished() }} {{ i18n.t('timerReady') }}
+    }
+  </p>
+</section>
