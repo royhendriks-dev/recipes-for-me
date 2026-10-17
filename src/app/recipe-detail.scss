@@ -44,3 +44,5 @@ input[type='range'] { width: 100%; accent-color: var(--accent); height: 44px; }
 .toast:empty { display: none; }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 .back { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 8px; color: var(--accent); font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--accent); border-color: var(--accent); }
+.btn.small { min-height: 44px; padding: 6px 14px; }

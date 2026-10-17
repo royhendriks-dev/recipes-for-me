@@ -1,0 +1,23 @@
+.panel { margin-top: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; position: sticky; bottom: 8px; max-height: 60vh; overflow: auto; box-shadow: 0 4px 16px rgb(0 0 0 / 12%); }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+h2 { font-family: var(--font-display); font-size: 20px; margin: 0; }
+.btn { min-height: 44px; padding: 8px 16px; border-radius: 10px; border: 1px solid transparent; font-weight: 600; background: var(--accent); color: var(--accent-fg); }
+.btn.small { min-height: 44px; }
+.btn.ghost { background: transparent; color: var(--accent); border-color: var(--accent); }
+.editor { display: grid; gap: 12px; margin-top: 12px; }
+label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; color: var(--muted); }
+input { font: inherit; min-height: 44px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); width: 100%; }
+.dial { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.chips, .row { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); }
+.timers { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.timer { background: var(--surface-2); border-radius: 12px; padding: 12px; }
+.line { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+.time { font-variant-numeric: tabular-nums; font-size: 20px; }
+.bar { height: 6px; border-radius: 3px; background: var(--line); margin: 8px 0; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--star); }
+.timer.ready .bar i { background: var(--accent); }
+.timer .row button { min-height: 44px; padding: 6px 12px; border: 0; background: transparent; color: var(--accent); font-weight: 600; border-radius: 8px; }
+.timer .row button:hover { background: var(--line); }
+.empty { color: var(--muted); font-size: 14px; margin: 12px 0 0; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

@@ -74,7 +74,7 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 - Receptpagina: ster als favoriet (nu nog in `localStorage`, dus per apparaat), personen-slider 1-4 die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten, deelknop (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
 - Nederlandse en Engelse interface; de taalknop bewaart de keuze in `localStorage`. Receptinhoud komt per taal uit de backend.
 - Licht en donker thema via `prefers-color-scheme`; systeemlettertypen, geen externe requests.
-- Keukentimers zitten er bewust nog niet in.
+- Keukentimers: onderaan het scherm blijft een paneel staan (ook bij wisselen van pagina) met timers die je bij een stap start (`timerMinutes`) of zelf toevoegt (naam, minuten en seconden, snelkeuze 5/10/15 min). Per timer pauzeren/hervatten, +1 min en verwijderen. De tijd rekent op een eindtijd, dus klopt ook als het scherm even uit was. Bij afloop volgt een melding voor schermlezers en, waar de browser dat kent, trilling; zolang een timer loopt vraagt de app (waar ondersteund) het scherm aan te houden. Timers staan alleen in het geheugen: herladen wist ze.
 
 ## API-contract (voorstel, door de backend-thread te bevestigen)
 
@@ -83,7 +83,7 @@ De frontend roept relatieve paden op dezelfde origin aan (`/api/...`, niet relat
 | Aanroep | Antwoord |
 |---|---|
 | `GET /api/recipes?lang=nl\|en` | lijst van `{ id, title, description, difficulty, minutes, servings, imageUrl? }` |
-| `GET /api/recipes/{id}?lang=nl\|en` | zelfde velden plus `ingredients: [{ name, quantity (getal of null), unit, unitPlural?, note? }]` en `steps: [{ text }]` |
+| `GET /api/recipes/{id}?lang=nl\|en` | zelfde velden plus `ingredients: [{ name, quantity (getal of null), unit, unitPlural?, note? }]` en `steps: [{ text, timerMinutes? }]` |
 
 `quantity` geldt voor `servings` personen; de app schaalt zelf naar 1-4 personen. De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.service.ts`. Testdata in dit formaat staat in `src/testing/fixtures.ts`.
 

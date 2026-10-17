@@ -26,7 +26,7 @@ export const RECIPE_FIXTURES: Record<Lang, Recipe> = {
       { name: 'Zout en peper', quantity: null, unit: '', note: 'naar smaak' },
     ],
     steps: [
-      { text: 'Kook de rijst volgens de verpakking in ongeveer 12 minuten gaar. Laat afgedekt staan tot het eten klaar is.' },
+      { text: 'Kook de rijst volgens de verpakking in ongeveer 12 minuten gaar. Laat afgedekt staan tot het eten klaar is.', timerMinutes: 12 },
       { text: 'Snipper de ui, snijd de paprika en courgette in blokjes en rasp de knoflook en gember. Laat de kikkererwten uitlekken en spoel ze af.' },
       { text: 'Bak de ui in een beetje olie glazig. Voeg knoflook, gember en currypasta toe en bak 1 minuut mee.' },
       { text: 'Roerbak de paprika en courgette 8 minuten op middelhoog vuur, tot ze net zacht worden.' },
@@ -58,7 +58,7 @@ export const RECIPE_FIXTURES: Record<Lang, Recipe> = {
       { name: 'Salt and pepper', quantity: null, unit: '', note: 'to taste' },
     ],
     steps: [
-      { text: 'Cook the rice according to the packet, about 12 minutes. Keep it covered until the meal is ready.' },
+      { text: 'Cook the rice according to the packet, about 12 minutes. Keep it covered until the meal is ready.', timerMinutes: 12 },
       { text: 'Chop the onion, dice the pepper and courgette and grate the garlic and ginger. Drain and rinse the chickpeas.' },
       { text: 'Fry the onion in a little oil until translucent. Add garlic, ginger and curry paste and fry for 1 minute.' },
       { text: 'Stir-fry the pepper and courgette for 8 minutes over medium heat, until just tender.' },

@@ -11,6 +11,8 @@ export interface Ingredient {
 
 export interface RecipeStep {
   text: string;
+  /** Optioneel: bij deze stap hoort een timer van zoveel minuten. */
+  timerMinutes?: number;
 }
 
 export interface Recipe {
