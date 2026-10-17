@@ -18,6 +18,7 @@ export type TranslationKey =
   | 'shareHint'
   | 'shareTitle'
   | 'shareIntro'
+  | 'shareIntroPlain'
   | 'copied'
   | 'copyFailed'
   | 'ingredientsAsText'
@@ -29,6 +30,12 @@ export type TranslationKey =
   | 'noRecipes'
   | 'listError'
   | 'back'
+  | 'notFound'
+  | 'optional'
+  | 'notes'
+  | 'main'
+  | 'side'
+  | 'sweet'
   | 'timers'
   | 'timerStart'
   | 'timerNew'
@@ -67,6 +74,7 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
       'Op je telefoon kies je een app uit het deelmenu, bijvoorbeeld Notities of een berichtenapp. Werkt dat niet, dan wordt de lijst gekopieerd.',
     shareTitle: 'Boodschappen',
     shareIntro: 'Ingrediënten voor',
+    shareIntroPlain: 'Ingrediënten',
     copied: 'Lijst gekopieerd naar het klembord',
     copyFailed: 'Kopiëren lukte niet. Selecteer de tekst hieronder en kopieer die zelf.',
     ingredientsAsText: 'Ingrediëntenlijst als tekst',
@@ -78,6 +86,12 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     noRecipes: 'Er zijn nog geen recepten.',
     listError: 'De recepten konden niet worden geladen.',
     back: 'Terug naar alle recepten',
+    notFound: 'Dit recept bestaat niet (meer).',
+    optional: 'optioneel',
+    notes: 'Notities',
+    main: 'Hoofdgerecht',
+    side: 'Bijgerecht',
+    sweet: 'Zoet',
     timers: 'Keuken timers',
     timerStart: 'Starten',
     timerNew: 'Timer toevoegen',
@@ -115,6 +129,7 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
       'On your phone you pick an app from the share menu, for example Notes or a messaging app. If that does not work, the list is copied.',
     shareTitle: 'Groceries',
     shareIntro: 'Ingredients for',
+    shareIntroPlain: 'Ingredients',
     copied: 'List copied to the clipboard',
     copyFailed: 'Copying failed. Select the text below and copy it yourself.',
     ingredientsAsText: 'Ingredient list as text',
@@ -126,6 +141,12 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     noRecipes: 'There are no recipes yet.',
     listError: 'The recipes could not be loaded.',
     back: 'Back to all recipes',
+    notFound: 'This recipe does not exist (any more).',
+    optional: 'optional',
+    notes: 'Notes',
+    main: 'Main course',
+    side: 'Side dish',
+    sweet: 'Sweet',
     timers: 'Kitchen timers',
     timerStart: 'Start',
     timerNew: 'Add timer',
