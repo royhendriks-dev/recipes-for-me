@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { I18nService } from './i18n.service';
-import { RecipeDetail } from './recipe-detail';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
-  imports: [RecipeDetail],
+  imports: [RouterOutlet, RouterLink],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',

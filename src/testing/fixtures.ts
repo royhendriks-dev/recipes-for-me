@@ -1,7 +1,7 @@
-import { Lang, Recipe } from './recipe.model';
+import { Lang, Recipe } from '../app/recipe.model';
 
-/** Voorbeeldrecept uit de goedgekeurde UI-mock; wordt vervangen door data uit de backend (zie RecipeService). */
-export const SAMPLE_RECIPES: Record<Lang, Recipe> = {
+/** Testdata in het formaat van de backend-API. */
+export const RECIPE_FIXTURES: Record<Lang, Recipe> = {
   nl: {
     id: 'voorbeeld-curry',
     title: 'Romige curry met kikkererwten en groenten',

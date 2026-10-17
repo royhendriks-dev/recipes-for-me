@@ -2,7 +2,7 @@
 
 Een receptenwebsite die je op je telefoon prettig kunt gebruiken. Iedereen kan de gepubliceerde recepten bekijken; de eigenaar logt in om recepten te beheren en favorieten te markeren.
 
-> **Status:** begin van de app. De Angular-frontend staat er (één receptpagina met het ingebouwde voorbeeldrecept uit de UI-mock, NL/EN). De koppeling met de backend volgt in een volgende PR.
+> **Status:** begin van de app. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder. De backend-endpoints worden in `royhendriks-dev/portfolio` gebouwd; tot die er zijn geven de aanroepen een foutmelding in de app.
 
 ## Doel
 
@@ -61,7 +61,7 @@ Vereist Node 22.22.3 of nieuwer (Angular 22 weigert oudere versies).
 
 ```sh
 npm ci
-npm start           # dev-server op http://localhost:4200
+npm start           # dev-server op http://localhost:4200, /api wordt doorgestuurd naar http://localhost:8080 (proxy.conf.json)
 npm run test:ci     # unit-tests (Vitest) met coverage
 npm run build       # productiebuild in dist/recipes/browser
 ```
@@ -70,10 +70,22 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 
 ## Wat er nu in zit
 
+- Receptenlijst (`#/`) en receptpagina (`#/recept/<id>`); routes zijn hash-routes zodat de app onder elk subpad werkt zonder serverconfiguratie.
 - Receptpagina: ster als favoriet (nu nog in `localStorage`, dus per apparaat), personen-slider 1-4 die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten, deelknop (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
-- Nederlandse en Engelse interface; de taalknop bewaart de keuze in `localStorage`. Receptinhoud is nu nog het ingebouwde voorbeeld in `src/app/sample-recipe.ts`.
+- Nederlandse en Engelse interface; de taalknop bewaart de keuze in `localStorage`. Receptinhoud komt per taal uit de backend.
 - Licht en donker thema via `prefers-color-scheme`; systeemlettertypen, geen externe requests.
 - Keukentimers zitten er bewust nog niet in.
+
+## API-contract (voorstel, door de backend-thread te bevestigen)
+
+De frontend roept relatieve paden op dezelfde origin aan (`/api/...`, niet relatief aan `/apps/recipes/`):
+
+| Aanroep | Antwoord |
+|---|---|
+| `GET /api/recipes?lang=nl\|en` | lijst van `{ id, title, description, difficulty, minutes, servings, imageUrl? }` |
+| `GET /api/recipes/{id}?lang=nl\|en` | zelfde velden plus `ingredients: [{ name, quantity (getal of null), unit, unitPlural?, note? }]` en `steps: [{ text }]` |
+
+`quantity` geldt voor `servings` personen; de app schaalt zelf naar 1-4 personen. De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.service.ts`. Testdata in dit formaat staat in `src/testing/fixtures.ts`.
 
 ## Container en images
 

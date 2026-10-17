@@ -3,3 +3,4 @@
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 20px; }
 .brand-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; }
 .lang { min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 600; }
+.brand { color: inherit; text-decoration: none; }
