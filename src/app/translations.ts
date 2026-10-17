@@ -52,7 +52,6 @@ export type TranslationKey =
   | 'timerEditDone'
   | 'timerAddTime'
   | 'timerCustom'
-  | 'timerSet'
   | 'timerReset'
   | 'timerIdle'
   | 'timerRunning'
@@ -106,7 +105,7 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     timerNew: 'Timer toevoegen',
     timerDefaultName: 'Keukentimer',
     timerPause: 'Pauzeren',
-    timerRemove: 'Verwijderen',
+    timerRemove: 'Verwijder timer',
     timerDone: 'Klaar',
     timerReady: 'is klaar',
     timerNone: 'Nog geen timers. Start er een bij een stap of voeg er zelf een toe.',
@@ -114,7 +113,6 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     timerEditDone: 'Naam opslaan',
     timerAddTime: 'Tijd toevoegen',
     timerCustom: 'Aangepast',
-    timerSet: 'Instellen',
     timerReset: 'Reset',
     timerIdle: 'Klaar om te starten',
     timerRunning: 'Loopt',
@@ -168,7 +166,7 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     timerNew: 'Add timer',
     timerDefaultName: 'Kitchen timer',
     timerPause: 'Pause',
-    timerRemove: 'Remove',
+    timerRemove: 'Remove timer',
     timerDone: 'Done',
     timerReady: 'is ready',
     timerNone: 'No timers yet. Start one at a step or add your own.',
@@ -176,7 +174,6 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     timerEditDone: 'Save name',
     timerAddTime: 'Add time',
     timerCustom: 'Custom',
-    timerSet: 'Set',
     timerReset: 'Reset',
     timerIdle: 'Ready to start',
     timerRunning: 'Running',
