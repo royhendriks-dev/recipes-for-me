@@ -1,0 +1,25 @@
+<h1>{{ i18n.t('allRecipes') }}</h1>
+@if (list.isLoading()) {
+  <p class="state" role="status">{{ i18n.t('loading') }}</p>
+} @else if (list.error()) {
+  <div class="state" role="alert">
+    <p>{{ i18n.t('listError') }}</p>
+    <button class="btn" type="button" (click)="list.reload()">{{ i18n.t('retry') }}</button>
+  </div>
+} @else if (list.value()?.length) {
+  <ul class="recipes">
+    @for (recipe of list.value(); track recipe.id) {
+      <li>
+        <a class="recipe" [routerLink]="['/recept', recipe.id]">
+          @if (recipe.imageUrl) {
+            <img [src]="recipe.imageUrl" alt="" loading="lazy" />
+          }
+          <span class="title">{{ recipe.title }}</span>
+          <span class="meta">{{ recipe.difficulty }} · {{ recipe.minutes }} {{ i18n.t('minutes') }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+} @else {
+  <p class="state">{{ i18n.t('noRecipes') }}</p>
+}

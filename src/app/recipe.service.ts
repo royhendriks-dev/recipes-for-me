@@ -1,11 +1,21 @@
-import { Injectable } from '@angular/core';
-import { Lang, Recipe } from './recipe.model';
-import { SAMPLE_RECIPES } from './sample-recipe';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { Lang, Recipe, RecipeSummary } from './recipe.model';
 
-/** Bron van recepten. Nu nog het ingebouwde voorbeeld; de backend-koppeling vervangt dit. */
+/**
+ * Haalt recepten op bij de backend (royhendriks-dev/portfolio) op dezelfde origin.
+ * Bewust een absoluut pad: de app draait onder /apps/recipes/, de API onder /api/.
+ */
 @Injectable({ providedIn: 'root' })
 export class RecipeService {
-  async getRecipe(lang: Lang): Promise<Recipe> {
-    return SAMPLE_RECIPES[lang];
+  private readonly http = inject(HttpClient);
+
+  list(lang: Lang): Promise<RecipeSummary[]> {
+    return firstValueFrom(this.http.get<RecipeSummary[]>('/api/recipes', { params: { lang } }));
+  }
+
+  get(id: string, lang: Lang): Promise<Recipe> {
+    return firstValueFrom(this.http.get<Recipe>(`/api/recipes/${encodeURIComponent(id)}`, { params: { lang } }));
   }
 }

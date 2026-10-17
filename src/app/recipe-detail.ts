@@ -1,4 +1,5 @@
-import { Component, computed, inject, resource, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, resource, signal, untracked } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { I18nService } from './i18n.service';
 import { formatQuantity } from './quantity';
 import { RecipeService } from './recipe.service';
@@ -24,6 +25,7 @@ function writeFavorites(ids: string[]): void {
 }
 
 @Component({
+  imports: [RouterLink],
   selector: 'app-recipe-detail',
   templateUrl: './recipe-detail.html',
   styleUrl: './recipe-detail.scss',
@@ -32,9 +34,12 @@ export class RecipeDetail {
   protected readonly i18n = inject(I18nService);
   private readonly recipes = inject(RecipeService);
 
+  /** Komt uit de route (`recept/:id`). */
+  readonly id = input.required<string>();
+
   protected readonly recipe = resource({
-    params: () => this.i18n.lang(),
-    loader: ({ params }) => this.recipes.getRecipe(params),
+    params: () => ({ id: this.id(), lang: this.i18n.lang() }),
+    loader: ({ params }) => this.recipes.get(params.id, params.lang),
   });
 
   protected readonly servings = signal(4);
@@ -44,8 +49,18 @@ export class RecipeDetail {
   protected readonly fallbackText = signal('');
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
 
+  constructor() {
+    // Begin bij het aantal personen van het recept (de slider gaat van 1 tot 4).
+    effect(() => {
+      const recipe = this.recipe.hasValue() ? this.recipe.value() : undefined;
+      if (recipe) {
+        untracked(() => this.servings.set(Math.min(4, Math.max(1, recipe.servings))));
+      }
+    });
+  }
+
   protected readonly isFavorite = computed(() => {
-    const recipe = this.recipe.value();
+    const recipe = this.recipe.hasValue() ? this.recipe.value() : undefined;
     return !!recipe && this.favorites().includes(recipe.id);
   });
 
