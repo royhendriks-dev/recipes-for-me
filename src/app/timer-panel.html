@@ -22,7 +22,6 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" /></svg>
               </button>
             }
-            <button class="remove" type="button" (click)="timerService.remove(timer.id)">{{ i18n.t('timerRemove') }}</button>
           </div>
 
           <div class="ring">
@@ -48,22 +47,23 @@
           <div class="custom" role="group" [attr.aria-label]="i18n.t('timerCustom')">
             <label>
               {{ i18n.t('timerMinShort') }}
-              <input #min type="number" min="0" max="180" inputmode="numeric" [value]="Math.floor(timer.initialSec / 60)" />
+              <input #min type="number" min="0" max="180" inputmode="numeric" placeholder="0" />
             </label>
             <label>
               {{ i18n.t('timerSecShort') }}
-              <input #sec type="number" min="0" max="59" inputmode="numeric" [value]="timer.initialSec % 60" />
+              <input #sec type="number" min="0" max="59" inputmode="numeric" placeholder="0" />
             </label>
-            <button class="soft" type="button" (click)="setCustom(timer, min.value, sec.value)">{{ i18n.t('timerSet') }}</button>
           </div>
 
           <div class="actions">
-            <button class="go" type="button" [disabled]="timerService.isDone(timer)" (click)="timerService.toggle(timer.id)">
+            <button class="go" type="button" (click)="startOrPause(timer, min, sec)">
               <span aria-hidden="true">{{ timerService.isRunning(timer) ? '⏸' : '▶' }}</span>
               {{ timerService.isRunning(timer) ? i18n.t('timerPause') : i18n.t('timerStart') }}
             </button>
             <button class="reset" type="button" (click)="timerService.reset(timer.id)">{{ i18n.t('timerReset') }}</button>
           </div>
+
+          <button class="remove" type="button" (click)="timerService.remove(timer.id)">{{ i18n.t('timerRemove') }}</button>
         </li>
       }
     </ul>

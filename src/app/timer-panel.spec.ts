@@ -53,19 +53,47 @@ describe('TimerPanel', () => {
     expect(el.querySelector('.time')?.textContent).toBe('10:00');
   });
 
-  it('telt tijd erbij en stelt een eigen tijd in', async () => {
+  it('telt tijd erbij', async () => {
     const { fixture, timers, el } = await setup();
     timers.add('Rijst', 300);
     await fixture.whenStable();
 
     await click(fixture, byText(el, '+5m'));
     expect(el.querySelector('.time')?.textContent).toBe('10:00');
+  });
 
+  it('pakt een ingevulde tijd meteen bij Starten en leegt de velden', async () => {
+    const { fixture, timers, el } = await setup();
+    timers.add('Rijst', 300);
+    await fixture.whenStable();
     const [min, sec] = Array.from(el.querySelectorAll('.custom input')) as HTMLInputElement[];
+    expect(min.value).toBe('');
+    expect(sec.value).toBe('');
+
     min.value = '2';
     sec.value = '30';
-    await click(fixture, byText(el, 'Instellen'));
-    expect(el.querySelector('.time')?.textContent).toBe('02:30');
+    await click(fixture, el.querySelector('.go'));
+    expect(timers.isRunning(timers.timers()[0])).toBe(true);
+    expect(timers.timers()[0].totalSec).toBe(150);
+    expect(min.value).toBe('');
+    expect(sec.value).toBe('');
+
+    min.value = '9';
+    await click(fixture, el.querySelector('.go'));
+    expect(timers.isRunning(timers.timers()[0])).toBe(false);
+    expect(timers.timers()[0].totalSec).toBe(150);
+  });
+
+  it('start een afgelopen timer opnieuw', async () => {
+    const { fixture, timers, el } = await setup();
+    const id = timers.add('Ei', 1);
+    timers.toggle(id);
+    timers.timers.update((all) => all.map((t) => ({ ...t, endsAt: null, pausedLeftSec: 0 })));
+    await fixture.whenStable();
+    expect(el.querySelector('.status')?.textContent).toBe('Tijd is om!');
+
+    await click(fixture, el.querySelector('.go'));
+    expect(timers.isRunning(timers.timers()[0])).toBe(true);
   });
 
   it('toont de naam als kopje, laat hem wijzigen en verwijdert een timer', async () => {
