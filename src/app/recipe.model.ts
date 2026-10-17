@@ -24,3 +24,6 @@ export interface Recipe {
   ingredients: Ingredient[];
   steps: RecipeStep[];
 }
+
+/** Een regel in de receptenlijst: een recept zonder ingrediënten en bereiding. */
+export type RecipeSummary = Omit<Recipe, 'ingredients' | 'steps'>;

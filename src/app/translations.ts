@@ -24,7 +24,11 @@ export type TranslationKey =
   | 'steps'
   | 'loading'
   | 'error'
-  | 'retry';
+  | 'retry'
+  | 'allRecipes'
+  | 'noRecipes'
+  | 'listError'
+  | 'back';
 
 export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
   nl: {
@@ -53,6 +57,10 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     loading: 'Recept laden…',
     error: 'Het recept kon niet worden geladen.',
     retry: 'Opnieuw proberen',
+    allRecipes: 'Alle recepten',
+    noRecipes: 'Er zijn nog geen recepten.',
+    listError: 'De recepten konden niet worden geladen.',
+    back: 'Terug naar alle recepten',
   },
   en: {
     appName: 'Recipes for me',
@@ -80,5 +88,9 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     loading: 'Loading recipe…',
     error: 'The recipe could not be loaded.',
     retry: 'Try again',
+    allRecipes: 'All recipes',
+    noRecipes: 'There are no recipes yet.',
+    listError: 'The recipes could not be loaded.',
+    back: 'Back to all recipes',
   },
 };
