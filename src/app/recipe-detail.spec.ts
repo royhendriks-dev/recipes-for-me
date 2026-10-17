@@ -2,13 +2,13 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { RECIPE_FIXTURES } from '../testing/fixtures';
+import { RECIPE_FIXTURES, RECIPE_SPARSE } from '../testing/fixtures';
 import { I18nService } from './i18n.service';
 import { RecipeDetail } from './recipe-detail';
 import { TimerService } from './timer.service';
 
 describe('RecipeDetail', () => {
-  async function setup() {
+  async function setup(recipe = RECIPE_FIXTURES.nl) {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [RecipeDetail],
@@ -16,10 +16,10 @@ describe('RecipeDetail', () => {
     }).compileComponents();
     TestBed.inject(I18nService).lang.set('nl');
     const fixture = TestBed.createComponent(RecipeDetail);
-    fixture.componentRef.setInput('id', 'voorbeeld-curry');
+    fixture.componentRef.setInput('id', 'curry-kikkererwten');
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
-    http.expectOne((r) => r.url === '/api/recipes/voorbeeld-curry').flush(RECIPE_FIXTURES.nl);
+    http.expectOne((r) => r.url === '/api/recipes/curry-kikkererwten').flush(recipe);
     await fixture.whenStable();
     return { fixture, http, el: fixture.nativeElement as HTMLElement };
   }
@@ -39,7 +39,7 @@ describe('RecipeDetail', () => {
     const { fixture, el } = await setup();
     (el.querySelector('.ing input') as HTMLInputElement).click();
     await fixture.whenStable();
-    expect(el.querySelector('.count')?.textContent).toContain('1 / 13');
+    expect(el.querySelector('.count')?.textContent).toContain('1 / 7');
     expect(el.querySelector('.ing li')?.classList).toContain('done');
   });
 
@@ -48,7 +48,7 @@ describe('RecipeDetail', () => {
     (el.querySelector('.fav') as HTMLButtonElement).click();
     await fixture.whenStable();
     expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('true');
-    expect(localStorage.getItem('recipes.favorites')).toContain('voorbeeld-curry');
+    expect(localStorage.getItem('recipes.favorites')).toContain('curry-kikkererwten');
   });
 
   it('deelt via Web Share en valt terug op het klembord en daarna op een tekstvak', async () => {
@@ -79,20 +79,49 @@ describe('RecipeDetail', () => {
     const { fixture, http } = await setup();
     TestBed.inject(I18nService).lang.set('en');
     fixture.detectChanges();
-    const req = http.expectOne((r) => r.url === '/api/recipes/voorbeeld-curry');
+    const req = http.expectOne((r) => r.url === '/api/recipes/curry-kikkererwten');
     expect(req.request.params.get('lang')).toBe('en');
     req.flush(RECIPE_FIXTURES.en);
     await fixture.whenStable();
     expect((fixture.nativeElement as HTMLElement).querySelector('h1')?.textContent).toContain('chickpea');
   });
 
-  it('toont een foutmelding als het recept niet geladen kan worden', async () => {
+  it('toont een aparte melding bij een onbekend recept (404)', async () => {
     const { fixture, http, el } = await setup();
     TestBed.inject(I18nService).lang.set('en');
     fixture.detectChanges();
-    http.expectOne((r) => r.url === '/api/recipes/voorbeeld-curry').flush('weg', { status: 404, statusText: 'Not Found' });
+    http.expectOne((r) => r.url === '/api/recipes/curry-kikkererwten').flush({ error: 'not_found' }, { status: 404, statusText: 'Not Found' });
+    await fixture.whenStable();
+    expect(el.querySelector('[role=alert]')?.textContent).toContain('does not exist');
+    expect(el.querySelector('[role=alert] button')).toBeNull();
+  });
+
+  it('toont een foutmelding met opnieuw proberen als de backend niet bereikbaar is (503)', async () => {
+    const { fixture, http, el } = await setup();
+    TestBed.inject(I18nService).lang.set('en');
+    fixture.detectChanges();
+    http.expectOne((r) => r.url === '/api/recipes/curry-kikkererwten').flush('weg', { status: 503, statusText: 'Service Unavailable' });
     await fixture.whenStable();
     expect(el.querySelector('[role=alert]')?.textContent).toContain('could not be loaded');
+    expect(el.querySelector('[role=alert] button')).not.toBeNull();
+  });
+
+  it('groepeert ingrediënten en stappen en toont optioneel en notities', async () => {
+    const { el } = await setup();
+    expect(Array.from(el.querySelectorAll('.group')).map((g) => g.textContent?.trim())).toEqual(['Curry', 'Rijst', 'Curry', 'Rijst', 'Curry']);
+    expect(el.querySelector('.note')?.textContent).toContain('optioneel');
+    expect(el.querySelector('.notes li')?.textContent).toContain('koriander');
+    expect(el.querySelector('.meta')?.textContent).toContain('Hoofdgerecht');
+    expect(el.querySelector('.tags li')?.textContent).toBe('vegetarisch');
+  });
+
+  it('schaalt niet en toont geen slider of minuten bij een recept zonder aantal personen', async () => {
+    const { el } = await setup(RECIPE_SPARSE);
+    expect(el.querySelector('#servings')).toBeNull();
+    expect(el.querySelector('.meta')?.textContent).not.toContain('minuten');
+    expect(Array.from(el.querySelectorAll('.qty')).map((q) => q.textContent)).toEqual(['', '3 stuk']);
+    expect(el.querySelector('.ing')?.textContent).toContain('250 g bloem');
+    expect(el.textContent).not.toContain('NaN');
   });
 
   it('start een timer bij een stap die er een heeft', async () => {

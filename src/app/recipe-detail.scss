@@ -1,7 +1,4 @@
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
-.hero { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 640px) { .hero:has(.photo) { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
-.photo { border-radius: 10px; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--surface-2); }
 h1 { font-family: var(--font-display); font-size: clamp(26px, 5vw, 34px); line-height: 1.15; margin: 0 0 12px; text-wrap: balance; }
 h2 { font-family: var(--font-display); font-size: 22px; margin: 0 0 14px; }
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; color: var(--muted); font-size: 15px; }
@@ -9,7 +6,6 @@ h2 { font-family: var(--font-display); font-size: 22px; margin: 0 0 14px; }
 .fav svg { width: 22px; height: 22px; fill: none; stroke: var(--star); stroke-width: 2; stroke-linejoin: round; }
 .fav[aria-pressed='true'] svg { fill: var(--star); }
 .fav[aria-pressed='true'] { border-color: var(--star); }
-.desc { margin: 14px 0 0; color: var(--muted); max-width: 62ch; }
 .persons { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 .persons label { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; margin-bottom: 8px; }
 .persons output { font-family: var(--font-display); font-size: 20px; color: var(--accent); font-variant-numeric: tabular-nums; }
@@ -46,3 +42,9 @@ input[type='range'] { width: 100%; accent-color: var(--accent); height: 44px; }
 .back { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 8px; color: var(--accent); font-weight: 600; }
 .btn.ghost { background: transparent; color: var(--accent); border-color: var(--accent); }
 .btn.small { min-height: 44px; padding: 6px 14px; }
+.tags { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tags li { background: var(--surface-2); color: var(--muted); border-radius: 999px; padding: 4px 12px; font-size: 14px; }
+.group { font-size: 16px; margin: 16px 0 0; color: var(--muted); }
+.notes-section { margin-top: 24px; }
+.notes { margin: 0; padding-left: 20px; max-width: 62ch; }
+.steps + .group { margin-top: 20px; }

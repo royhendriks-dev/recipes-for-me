@@ -11,11 +11,10 @@
     @for (recipe of list.value(); track recipe.id) {
       <li>
         <a class="recipe" [routerLink]="['/recept', recipe.id]">
-          @if (recipe.imageUrl) {
-            <img [src]="recipe.imageUrl" alt="" loading="lazy" />
-          }
           <span class="title">{{ recipe.title }}</span>
-          <span class="meta">{{ recipe.difficulty }} · {{ recipe.minutes }} {{ i18n.t('minutes') }}</span>
+          <span class="meta">
+            {{ i18n.t(recipe.category) }}@if (recipe.minutes !== null) { · {{ recipe.minutes }} {{ i18n.t('minutes') }}}
+          </span>
         </a>
       </li>
     }
