@@ -19,7 +19,6 @@ export class TimerPanel {
   protected readonly circumference = CIRCUMFERENCE;
   /** Id van de timer waarvan de naam nu wordt bewerkt. */
   protected readonly editing = signal<number | null>(null);
-  protected readonly Math = Math;
 
   protected addTimer(): void {
     this.timerService.add(this.i18n.t('timerDefaultName'), DEFAULT_SEC);
@@ -53,7 +52,21 @@ export class TimerPanel {
     this.editing.set(null);
   }
 
-  protected setCustom(timer: KitchenTimer, minutes: string, seconds: string): void {
-    this.timerService.setDuration(timer.id, (Number(minutes) || 0) * 60 + (Number(seconds) || 0));
+  /**
+   * Starten pakt een ingevulde tijd meteen (en leegt de velden); zonder invoer start of hervat hij de
+   * ingestelde tijd, en een afgelopen timer begint opnieuw. Tijdens het lopen pauzeert de knop alleen.
+   */
+  protected startOrPause(timer: KitchenTimer, min: HTMLInputElement, sec: HTMLInputElement): void {
+    if (!this.timerService.isRunning(timer)) {
+      const typed = (Number(min.value) || 0) * 60 + (Number(sec.value) || 0);
+      if (typed > 0) {
+        this.timerService.setDuration(timer.id, typed);
+        min.value = '';
+        sec.value = '';
+      } else if (this.timerService.isDone(timer)) {
+        this.timerService.reset(timer.id);
+      }
+    }
+    this.timerService.toggle(timer.id);
   }
 }
