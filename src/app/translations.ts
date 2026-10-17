@@ -41,20 +41,26 @@ export type TranslationKey =
   | 'filterAll'
   | 'timerStart'
   | 'timerNew'
-  | 'timerName'
   | 'timerDefaultName'
-  | 'timerMin'
-  | 'timerSec'
   | 'timerPause'
-  | 'timerResume'
-  | 'timerPlusMinute'
   | 'timerRemove'
   | 'timerDone'
   | 'timerReady'
-  | 'timerCancel'
-  | 'timerQuick'
   | 'timerNone'
-  | 'timerStepLabel';
+  | 'timerStepLabel'
+  | 'timerTitle'
+  | 'timerLabel'
+  | 'timerAddTime'
+  | 'timerPresets'
+  | 'timerCustom'
+  | 'timerSet'
+  | 'timerReset'
+  | 'timerIdle'
+  | 'timerRunning'
+  | 'timerPaused'
+  | 'timerTimeUp'
+  | 'timerMinShort'
+  | 'timerSecShort';
 
 export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
   nl: {
@@ -96,22 +102,28 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     main: 'Hoofdgerecht',
     side: 'Bijgerecht',
     sweet: 'Zoet',
-    timers: 'Keuken timers',
+    timers: 'Keukentimers',
     timerStart: 'Starten',
     timerNew: 'Timer toevoegen',
-    timerName: 'Naam',
     timerDefaultName: 'Eigen timer',
-    timerMin: 'Minuten',
-    timerSec: 'Seconden',
     timerPause: 'Pauzeren',
-    timerResume: 'Hervatten',
-    timerPlusMinute: '+1 min',
     timerRemove: 'Verwijderen',
     timerDone: 'Klaar',
     timerReady: 'is klaar',
-    timerCancel: 'Annuleren',
-    timerQuick: 'Snelkeuze',
     timerNone: 'Nog geen timers. Start er een bij een stap of voeg er zelf een toe.',
+    timerTitle: 'Keukentimer',
+    timerLabel: 'Timer naam',
+    timerAddTime: 'Tijd toevoegen',
+    timerPresets: 'Presets',
+    timerCustom: 'Aangepast',
+    timerSet: 'Instellen',
+    timerReset: 'Reset',
+    timerIdle: 'Klaar om te starten',
+    timerRunning: 'Loopt',
+    timerPaused: 'Gepauzeerd',
+    timerTimeUp: 'Tijd is om!',
+    timerMinShort: 'minuten',
+    timerSecShort: 'seconden',
     timerStepLabel: 'Timer',
   },
   en: {
@@ -156,19 +168,25 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     timers: 'Kitchen timers',
     timerStart: 'Start',
     timerNew: 'Add timer',
-    timerName: 'Name',
     timerDefaultName: 'Custom timer',
-    timerMin: 'Minutes',
-    timerSec: 'Seconds',
     timerPause: 'Pause',
-    timerResume: 'Resume',
-    timerPlusMinute: '+1 min',
     timerRemove: 'Remove',
     timerDone: 'Done',
     timerReady: 'is ready',
-    timerCancel: 'Cancel',
-    timerQuick: 'Quick pick',
     timerNone: 'No timers yet. Start one at a step or add your own.',
+    timerTitle: 'Kitchen timer',
+    timerLabel: 'Timer name',
+    timerAddTime: 'Add time',
+    timerPresets: 'Presets',
+    timerCustom: 'Custom',
+    timerSet: 'Set',
+    timerReset: 'Reset',
+    timerIdle: 'Ready to start',
+    timerRunning: 'Running',
+    timerPaused: 'Paused',
+    timerTimeUp: "Time's up!",
+    timerMinShort: 'minutes',
+    timerSecShort: 'seconds',
     timerStepLabel: 'Timer',
   },
 };

@@ -1,8 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { I18nService } from './i18n.service';
 import { KitchenTimer, TimerService } from './timer.service';
 
-const PRESET_MINUTES = [5, 10, 15];
+const PRESET_MINUTES = [1, 3, 5, 10];
+const ADD_MINUTES = [1, 5];
+const DEFAULT_SEC = 300;
+/** Omtrek van de voortgangsring (2 * pi * 42). */
+const CIRCUMFERENCE = 264;
 
 @Component({
   selector: 'app-timer-panel',
@@ -13,7 +17,13 @@ export class TimerPanel {
   protected readonly i18n = inject(I18nService);
   protected readonly timerService = inject(TimerService);
   protected readonly presets = PRESET_MINUTES;
-  protected readonly adding = signal(false);
+  protected readonly addMinutes = ADD_MINUTES;
+  protected readonly circumference = CIRCUMFERENCE;
+  protected readonly Math = Math;
+
+  protected addTimer(): void {
+    this.timerService.add(this.i18n.t('timerDefaultName'), DEFAULT_SEC);
+  }
 
   protected format(timer: KitchenTimer): string {
     const left = this.timerService.leftSec(timer);
@@ -22,15 +32,27 @@ export class TimerPanel {
     return `${mm}:${ss}`;
   }
 
-  protected progress(timer: KitchenTimer): number {
-    return Math.min(100, Math.max(0, (1 - this.timerService.leftSec(timer) / timer.totalSec) * 100));
+  protected status(timer: KitchenTimer): string {
+    if (this.timerService.isDone(timer)) {
+      return this.i18n.t('timerTimeUp');
+    }
+    if (this.timerService.isRunning(timer)) {
+      return this.i18n.t('timerRunning');
+    }
+    return this.i18n.t(timer.started ? 'timerPaused' : 'timerIdle');
   }
 
-  protected startCustom(name: string, minutes: string, seconds: string): void {
-    const total = (Number(minutes) || 0) * 60 + (Number(seconds) || 0);
-    if (total > 0) {
-      this.timerService.start(name.trim() || this.i18n.t('timerDefaultName'), total);
-      this.adding.set(false);
-    }
+  /** Streepjesafstand van de ring: vol bij het begin, leeg als de tijd om is. */
+  protected offset(timer: KitchenTimer): number {
+    const fraction = Math.min(1, Math.max(0, this.timerService.leftSec(timer) / timer.totalSec));
+    return CIRCUMFERENCE * (1 - fraction);
+  }
+
+  protected rename(timer: KitchenTimer, event: Event): void {
+    this.timerService.rename(timer.id, (event.target as HTMLInputElement).value);
+  }
+
+  protected setCustom(timer: KitchenTimer, minutes: string, seconds: string): void {
+    this.timerService.setDuration(timer.id, (Number(minutes) || 0) * 60 + (Number(seconds) || 0));
   }
 }

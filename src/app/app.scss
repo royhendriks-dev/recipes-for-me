@@ -8,5 +8,4 @@
 .side { min-width: 0; }
 @media (min-width: 900px) {
   .layout { grid-template-columns: minmax(0, 1fr) 320px; }
-  .side { position: sticky; top: 16px; }
 }
