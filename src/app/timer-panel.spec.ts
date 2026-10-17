@@ -32,7 +32,7 @@ describe('TimerPanel', () => {
 
     await click(fixture, el.querySelector('.add'));
     expect(timers.timers()).toHaveLength(1);
-    expect(timers.timers()[0]).toMatchObject({ name: 'Eigen timer', totalSec: 300 });
+    expect(timers.timers()[0]).toMatchObject({ name: 'Keukentimer', totalSec: 300 });
     expect(timers.isRunning(timers.timers()[0])).toBe(false);
     expect(el.querySelector('.time')?.textContent).toBe('05:00');
     expect(el.querySelector('.status')?.textContent).toBe('Klaar om te starten');
@@ -68,15 +68,25 @@ describe('TimerPanel', () => {
     expect(el.querySelector('.time')?.textContent).toBe('02:30');
   });
 
-  it('hernoemt en verwijdert een timer', async () => {
+  it('toont de naam als kopje, laat hem wijzigen en verwijdert een timer', async () => {
     const { fixture, timers, el } = await setup();
     timers.add('Rijst', 300);
     await fixture.whenStable();
+    expect(el.querySelector('.timer h3')?.textContent).toBe('Rijst');
 
-    const name = el.querySelector('.field input') as HTMLInputElement;
-    name.value = 'Eieren';
-    name.dispatchEvent(new Event('input'));
+    await click(fixture, el.querySelector('.top .icon'));
+    const input = el.querySelector('.rename input') as HTMLInputElement;
+    input.value = 'Eieren';
+    el.querySelector('.rename')?.dispatchEvent(new Event('submit'));
+    await fixture.whenStable();
     expect(timers.timers()[0].name).toBe('Eieren');
+    expect(el.querySelector('.timer h3')?.textContent).toBe('Eieren');
+
+    await click(fixture, el.querySelector('.top .icon'));
+    (el.querySelector('.rename input') as HTMLInputElement).value = '  ';
+    el.querySelector('.rename')?.dispatchEvent(new Event('submit'));
+    await fixture.whenStable();
+    expect(timers.timers()[0].name).toBe('Keukentimer');
 
     await click(fixture, el.querySelector('.remove'));
     expect(timers.timers()).toHaveLength(0);

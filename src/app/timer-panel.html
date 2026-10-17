@@ -9,14 +9,21 @@
       @for (timer of timerService.timers(); track timer.id) {
         <li class="timer" [class.ready]="timerService.isDone(timer)">
           <div class="top">
-            <h3>{{ i18n.t('timerTitle') }}</h3>
+            @if (editing() === timer.id) {
+              <form class="rename" (submit)="$event.preventDefault(); saveName(timer, nameInput.value)">
+                <input #nameInput type="text" maxlength="30" [value]="timer.name" [attr.aria-label]="i18n.t('timerEditDone')" autofocus />
+                <button class="icon" type="submit" [attr.aria-label]="i18n.t('timerEditDone')">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                </button>
+              </form>
+            } @else {
+              <h3>{{ timer.name }}</h3>
+              <button class="icon" type="button" [attr.aria-label]="i18n.t('timerEdit')" (click)="editing.set(timer.id)">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" /></svg>
+              </button>
+            }
             <button class="remove" type="button" (click)="timerService.remove(timer.id)">{{ i18n.t('timerRemove') }}</button>
           </div>
-
-          <label class="field">
-            {{ i18n.t('timerLabel') }}
-            <input type="text" maxlength="30" [value]="timer.name" (input)="rename(timer, $event)" />
-          </label>
 
           <div class="ring">
             <svg viewBox="0 0 100 100" aria-hidden="true">

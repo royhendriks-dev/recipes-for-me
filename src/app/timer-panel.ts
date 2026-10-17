@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { I18nService } from './i18n.service';
 import { KitchenTimer, TimerService } from './timer.service';
 
@@ -17,6 +17,8 @@ export class TimerPanel {
   protected readonly timerService = inject(TimerService);
   protected readonly addMinutes = ADD_MINUTES;
   protected readonly circumference = CIRCUMFERENCE;
+  /** Id van de timer waarvan de naam nu wordt bewerkt. */
+  protected readonly editing = signal<number | null>(null);
   protected readonly Math = Math;
 
   protected addTimer(): void {
@@ -46,8 +48,9 @@ export class TimerPanel {
     return CIRCUMFERENCE * (1 - fraction);
   }
 
-  protected rename(timer: KitchenTimer, event: Event): void {
-    this.timerService.rename(timer.id, (event.target as HTMLInputElement).value);
+  protected saveName(timer: KitchenTimer, value: string): void {
+    this.timerService.rename(timer.id, value.trim() || this.i18n.t('timerDefaultName'));
+    this.editing.set(null);
   }
 
   protected setCustom(timer: KitchenTimer, minutes: string, seconds: string): void {
