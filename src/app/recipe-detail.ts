@@ -1,7 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, input, resource, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18nService } from './i18n.service';
 import { formatQuantity } from './quantity';
+import { groupItems } from './recipe.model';
 import { RecipeService } from './recipe.service';
 import { TimerService } from './timer.service';
 import { buildShareText } from './share';
@@ -44,7 +46,18 @@ export class RecipeDetail {
     loader: ({ params }) => this.recipes.get(params.id, params.lang),
   });
 
-  protected readonly servings = signal(4);
+  /** Het recept zodra het geladen is (lees `recipe.value()` niet rechtstreeks: dat gooit bij een fout). */
+  protected readonly current = computed(() => (this.recipe.hasValue() ? this.recipe.value() : undefined));
+  protected readonly ingredientGroups = computed(() => groupItems(this.current()?.ingredients ?? []));
+  protected readonly stepGroups = computed(() => groupItems(this.current()?.steps ?? []));
+  protected readonly notFound = computed(() => {
+    const error: unknown = this.recipe.error();
+    const failure = error instanceof HttpErrorResponse ? error : (error as { cause?: unknown } | undefined)?.cause;
+    return failure instanceof HttpErrorResponse && failure.status === 404;
+  });
+
+  /** Aantal personen voor de slider (1-4); null als het recept er geen heeft: dan wordt niet geschaald. */
+  protected readonly servings = signal<number | null>(null);
   protected readonly checked = signal<ReadonlySet<number>>(new Set());
   protected readonly favorites = signal<string[]>(readFavorites());
   protected readonly toast = signal('');
@@ -54,27 +67,30 @@ export class RecipeDetail {
   constructor() {
     // Begin bij het aantal personen van het recept (de slider gaat van 1 tot 4).
     effect(() => {
-      const recipe = this.recipe.hasValue() ? this.recipe.value() : undefined;
+      const recipe = this.current();
       if (recipe) {
-        untracked(() => this.servings.set(Math.min(4, Math.max(1, recipe.servings))));
+        untracked(() => this.servings.set(recipe.servings === null ? null : Math.min(4, Math.max(1, recipe.servings))));
       }
     });
   }
 
   protected readonly isFavorite = computed(() => {
-    const recipe = this.recipe.hasValue() ? this.recipe.value() : undefined;
+    const recipe = this.current();
     return !!recipe && this.favorites().includes(recipe.id);
   });
 
-  protected readonly servingsLabel = computed(() => this.servingsText(this.servings()));
+  protected readonly servingsLabel = computed(() => {
+    const servings = this.servings();
+    return servings === null ? '' : this.servingsText(servings);
+  });
 
   protected servingsText(count: number): string {
     return `${count} ${this.i18n.t(count === 1 ? 'person' : 'people')}`;
   }
 
   protected quantity(index: number): string {
-    const recipe = this.recipe.value();
-    return recipe ? formatQuantity(recipe.ingredients[index], this.servings(), recipe.servings) : '';
+    const recipe = this.current();
+    return recipe ? formatQuantity(recipe.ingredients[index], this.servings(), recipe.servings, this.i18n.lang()) : '';
   }
 
   protected setServings(event: Event): void {
@@ -82,7 +98,7 @@ export class RecipeDetail {
   }
 
   protected startTimer(stepNumber: number, minutes: number): void {
-    this.timers.start(`${this.recipe.value()?.title ?? ''} ${this.i18n.t('steps')} ${stepNumber}`.trim(), minutes * 60);
+    this.timers.start(`${this.current()?.title ?? ''} ${this.i18n.t('steps')} ${stepNumber}`.trim(), minutes * 60);
   }
 
   protected toggleChecked(index: number): void {
@@ -96,7 +112,7 @@ export class RecipeDetail {
   }
 
   protected toggleFavorite(): void {
-    const recipe = this.recipe.value();
+    const recipe = this.current();
     if (!recipe) {
       return;
     }
@@ -108,15 +124,20 @@ export class RecipeDetail {
   }
 
   protected async share(): Promise<void> {
-    const recipe = this.recipe.value();
+    const recipe = this.current();
     if (!recipe) {
       return;
     }
     const text = buildShareText(
       recipe,
       this.servings(),
-      this.i18n.t('shareIntro'),
-      this.i18n.t(this.servings() === 1 ? 'person' : 'people'),
+      {
+        intro: this.i18n.t('shareIntro'),
+        introPlain: this.i18n.t('shareIntroPlain'),
+        personsLabel: this.i18n.t(this.servings() === 1 ? 'person' : 'people'),
+        optional: this.i18n.t('optional'),
+      },
+      this.i18n.lang(),
     );
     if (navigator.share) {
       try {

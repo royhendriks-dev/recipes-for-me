@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { RECIPE_FIXTURES } from '../testing/fixtures';
+import { RECIPE_FIXTURES, RECIPE_SPARSE, toSummary } from '../testing/fixtures';
 import { I18nService } from './i18n.service';
 import { RecipeList } from './recipe-list';
 
@@ -24,12 +24,13 @@ describe('RecipeList', () => {
     const { fixture, http, el } = await setup();
     const req = http.expectOne((r) => r.url === '/api/recipes');
     expect(req.request.params.get('lang')).toBe('nl');
-    const { ingredients, steps, ...summary } = RECIPE_FIXTURES.nl;
-    expect(ingredients.length + steps.length).toBeGreaterThan(0);
-    req.flush([summary]);
+    req.flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
     await fixture.whenStable();
-    expect(el.querySelector('.title')?.textContent).toContain('kikkererwten');
-    expect(el.querySelector('a.recipe')?.getAttribute('href')).toBe('/recept/voorbeeld-curry');
+    const titles = Array.from(el.querySelectorAll('.title')).map((t) => t.textContent);
+    expect(titles).toEqual(['Romige curry met kikkererwten', 'Appeltaart']);
+    expect(el.querySelector('a.recipe')?.getAttribute('href')).toBe('/recept/curry-kikkererwten');
+    const meta = Array.from(el.querySelectorAll('.meta')).map((m) => m.textContent?.replace(/\s+/g, ' ').trim());
+    expect(meta).toEqual(['Hoofdgerecht · 45 minuten', 'Zoet']);
   });
 
   it('toont een lege staat', async () => {

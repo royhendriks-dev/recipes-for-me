@@ -1,31 +1,55 @@
 export type Lang = 'nl' | 'en';
 
+export type Category = 'main' | 'side' | 'sweet';
+
+/** Zoals de backend het levert (royhendriks-dev/portfolio, backend/README.md). */
 export interface Ingredient {
+  /** Hoeveelheid voor `Recipe.servings` personen; null = geen hoeveelheid (de hele regel staat in `name`). */
+  amount: number | null;
+  unit: string | null;
   name: string;
-  /** Hoeveelheid voor `Recipe.servings` personen; null = "naar smaak". */
-  quantity: number | null;
-  unit: string;
-  unitPlural?: string;
-  note?: string;
+  group: string | null;
+  optional: boolean;
 }
 
 export interface RecipeStep {
   text: string;
-  /** Optioneel: bij deze stap hoort een timer van zoveel minuten. */
+  group: string | null;
+  /** Voorstel, nog niet in de backend: bij deze stap hoort een timer van zoveel minuten. */
   timerMinutes?: number;
 }
 
-export interface Recipe {
+/** Een regel in de receptenlijst. `minutes` en `servings` kunnen leeg zijn. */
+export interface RecipeSummary {
   id: string;
   title: string;
-  description: string;
-  difficulty: string;
-  minutes: number;
-  servings: number;
-  imageUrl?: string;
-  ingredients: Ingredient[];
-  steps: RecipeStep[];
+  category: Category;
+  tags: string[];
+  minutes: number | null;
+  servings: number | null;
 }
 
-/** Een regel in de receptenlijst: een recept zonder ingrediënten en bereiding. */
-export type RecipeSummary = Omit<Recipe, 'ingredients' | 'steps'>;
+export interface Recipe extends RecipeSummary {
+  ingredients: Ingredient[];
+  steps: RecipeStep[];
+  notes: string[];
+}
+
+export interface Group<T> {
+  name: string | null;
+  items: { item: T; index: number }[];
+}
+
+/** Groepeert opeenvolgende items met dezelfde groepsnaam; `index` is de plek in de oorspronkelijke lijst. */
+export function groupItems<T extends { group: string | null }>(items: T[]): Group<T>[] {
+  const groups: Group<T>[] = [];
+  items.forEach((item, index) => {
+    const last = groups[groups.length - 1];
+    if (last && last.name === item.group) {
+      last.items.push({ item, index });
+    } else {
+      groups.push({ name: item.group, items: [{ item, index }] });
+    }
+  });
+  return groups;
+}
