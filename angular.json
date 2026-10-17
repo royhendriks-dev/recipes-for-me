@@ -58,6 +58,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
+            "port": 4300,
+            "servePath": "/apps/recipes/",
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {

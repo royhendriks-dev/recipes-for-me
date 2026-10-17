@@ -61,10 +61,12 @@ Vereist Node 22.22.3 of nieuwer (Angular 22 weigert oudere versies).
 
 ```sh
 npm ci
-npm start           # dev-server op http://localhost:4200, /api wordt doorgestuurd naar http://localhost:8080 (proxy.conf.json)
+npm start           # dev-server op http://localhost:4300/apps/recipes/, /api wordt doorgestuurd naar http://localhost:8080 (proxy.conf.json)
 npm run test:ci     # unit-tests (Vitest) met coverage
 npm run build       # productiebuild in dist/recipes/browser
 ```
+
+De dev-server draait bewust op poort 4300 (niet de standaard 4200, die is van de portfolio-frontend) en met `servePath` `/apps/recipes/`. Zo kan de dev-server van het portfolio (`npm start` in `portfolio/frontend`, http://localhost:4200) `/apps/recipes/` naar deze app doorsturen en laadt het Recepten-venster daar de echte app. Start eerst deze app en open dan http://localhost:4200 (portfolio); losse app: http://localhost:4300/apps/recipes/. Zonder draaiende recepten-dev-server toont het portfolio een 503-pagina in dat venster.
 
 De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een subpad zoals `/apps/recipes/`.
 
