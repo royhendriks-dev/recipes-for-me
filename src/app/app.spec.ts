@@ -28,6 +28,7 @@ describe('App', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('h1')?.textContent).toBe('Alle recepten');
 
+    // los draaiend (niet in het portfolio-iframe) is er een eigen taalknop
     (el.querySelector('.lang') as HTMLButtonElement).click();
     fixture.detectChanges();
     http.expectOne((r) => r.url === '/api/recipes').flush([]);
@@ -35,5 +36,22 @@ describe('App', () => {
     expect(el.querySelector('h1')?.textContent).toBe('All recipes');
     expect(document.documentElement.lang).toBe('en');
     expect(RECIPE_FIXTURES.en.id).toBe(RECIPE_FIXTURES.nl.id);
+  });
+
+  it('volgt de taal die het portfolio in localStorage zet', () => {
+    const i18n = TestBed.inject(I18nService);
+    i18n.lang.set('nl');
+    window.dispatchEvent(new StorageEvent('storage', { key: 'lang', newValue: 'en' }));
+    expect(i18n.lang()).toBe('en');
+    window.dispatchEvent(new StorageEvent('storage', { key: 'lang', newValue: 'xx' }));
+    expect(i18n.lang()).toBe('en');
+  });
+
+  it('toont geen eigen taalknop binnen het portfolio', async () => {
+    const i18n = TestBed.inject(I18nService);
+    (i18n as { embedded: boolean }).embedded = true;
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.lang')).toBeNull();
   });
 });

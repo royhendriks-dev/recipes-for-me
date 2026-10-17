@@ -6,12 +6,18 @@
       </span>
       {{ i18n.t('appName') }}
     </a>
-    <button class="lang" type="button" [attr.lang]="i18n.otherLang()" [attr.aria-label]="i18n.t('switchTo')" (click)="i18n.toggle()">
+    @if (!i18n.embedded) {
+      <button class="lang" type="button" [attr.lang]="i18n.otherLang()" [attr.aria-label]="i18n.t('switchTo')" (click)="i18n.toggle()">
       {{ i18n.otherLang().toUpperCase() }}
-    </button>
+      </button>
+    }
   </header>
-  <main>
-    <router-outlet />
-  </main>
-  <app-timer-panel />
+  <div class="layout">
+    <main>
+      <router-outlet />
+    </main>
+    <aside class="side">
+      <app-timer-panel />
+    </aside>
+  </div>
 </div>
