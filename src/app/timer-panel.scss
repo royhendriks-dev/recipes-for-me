@@ -1,4 +1,4 @@
-.panel { margin-top: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; position: sticky; bottom: 8px; max-height: 60vh; overflow: auto; box-shadow: 0 4px 16px rgb(0 0 0 / 12%); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
 .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 h2 { font-family: var(--font-display); font-size: 20px; margin: 0; }
 .btn { min-height: 44px; padding: 8px 16px; border-radius: 10px; border: 1px solid transparent; font-weight: 600; background: var(--accent); color: var(--accent-fg); }

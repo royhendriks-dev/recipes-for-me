@@ -49,4 +49,18 @@ describe('RecipeList', () => {
     fixture.detectChanges();
     http.expectOne((r) => r.url === '/api/recipes').flush([]);
   });
+
+  it('groepeert per soort gerecht met kopjes en filtert', async () => {
+    const { fixture, http, el } = await setup();
+    http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_SPARSE), toSummary(RECIPE_FIXTURES.nl)]);
+    await fixture.whenStable();
+    const headings = () => Array.from(el.querySelectorAll('h2')).map((h) => h.textContent?.replace(/\s+/g, ' ').trim());
+    expect(headings()).toEqual(['Hoofdgerecht (1)', 'Zoet (1)']);
+
+    const zoet = Array.from(el.querySelectorAll<HTMLButtonElement>('.filter button')).find((b) => b.textContent?.trim() === 'Zoet');
+    zoet?.click();
+    fixture.detectChanges();
+    expect(headings()).toEqual(['Zoet (1)']);
+    expect(zoet?.getAttribute('aria-pressed')).toBe('true');
+  });
 });

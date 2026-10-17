@@ -74,9 +74,10 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 
 - Receptenlijst (`#/`) en receptpagina (`#/recept/<id>`); routes zijn hash-routes zodat de app onder elk subpad werkt zonder serverconfiguratie.
 - Receptpagina: ster als favoriet (nu nog in `localStorage`, dus per apparaat), personen-slider 1-4 die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten, deelknop (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
-- Nederlandse en Engelse interface; de taalknop bewaart de keuze in `localStorage`. Receptinhoud komt per taal uit de backend.
+- Nederlandse en Engelse interface. In het portfolio (iframe) volgt de app de taal van de NL/EN-knop in de titelbalk: dezelfde `localStorage`-sleutel `lang` (zelfde origin), met een `storage`-event bij wisselen; de app heeft daar geen eigen taalknop. Los draaiend (buiten een iframe) staat er wel een taalknop. Receptinhoud komt per taal uit de backend.
+- Receptenlijst: gegroepeerd onder kopjes Hoofdgerecht, Bijgerecht en Zoet (met aantal), een filter per soort, en per recept een categorie-icoon (er zijn nog geen afbeeldingen in de data).
 - Licht en donker thema via `prefers-color-scheme`; systeemlettertypen, geen externe requests.
-- Keukentimers: onderaan het scherm blijft een paneel staan (ook bij wisselen van pagina) met timers die je bij een stap start (`timerMinutes`) of zelf toevoegt (naam, minuten en seconden, snelkeuze 5/10/15 min). Per timer pauzeren/hervatten, +1 min en verwijderen. De tijd rekent op een eindtijd, dus klopt ook als het scherm even uit was. Bij afloop volgt een melding voor schermlezers en, waar de browser dat kent, trilling; zolang een timer loopt vraagt de app (waar ondersteund) het scherm aan te houden. Timers staan alleen in het geheugen: herladen wist ze.
+- Keukentimers: een paneel rechts naast de inhoud (onder de inhoud op smalle schermen; blijft staan bij wisselen van pagina) met timers die je bij een stap start (`timerMinutes`) of zelf toevoegt (naam, minuten en seconden, snelkeuze 5/10/15 min). Per timer pauzeren/hervatten, +1 min en verwijderen. De tijd rekent op een eindtijd, dus klopt ook als het scherm even uit was. Bij afloop volgt een melding voor schermlezers en, waar de browser dat kent, trilling; zolang een timer loopt vraagt de app (waar ondersteund) het scherm aan te houden. Timers staan alleen in het geheugen: herladen wist ze.
 
 ## API-contract
 
