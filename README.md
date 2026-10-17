@@ -99,5 +99,5 @@ De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.ser
 
 - `Dockerfile`: bouwt de app en serveert de statische bestanden met `nginxinc/nginx-unprivileged` op poort 8080 (config in `docker/nginx.conf`, CSP met `frame-ancestors 'self'`). Alleen de nginx-laag is architectuurafhankelijk; de build is voor amd64 en arm64 gelijk.
 - `.github/workflows/images.yml` bouwt `linux/amd64` en `linux/arm64` en pusht naar `ghcr.io/royhendriks-dev/recipes-for-me` bij een push naar `main` (tags `sha-<korte-sha>` en `latest`) en bij een `v*`-tag (semver). Op een PR wordt alleen gebouwd, niet gepusht.
-- `.github/workflows/ci.yml`: tests met coverage, build en SonarQube Cloud (`sonar-project.properties`).
+- `.github/workflows/ci.yml`: tests met coverage (drempel 80% voor statements, branches, functions en lines, ingesteld in `angular.json`), build en SonarQube Cloud (`sonar-project.properties`); de job wacht op de Sonar-quality gate en faalt als die niet slaagt.
 - Let op: de Docker-build is lokaal niet uitgeprobeerd (geen Docker-daemon beschikbaar); de eerste echte run is die van de workflow.
