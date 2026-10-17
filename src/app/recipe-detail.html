@@ -81,7 +81,14 @@
         @for (step of r.steps; track $index) {
           <li>
             <span class="n" aria-hidden="true">{{ $index + 1 }}</span>
-            <p>{{ step.text }}</p>
+            <div>
+              <p>{{ step.text }}</p>
+              @if (step.timerMinutes) {
+                <button class="btn ghost small" type="button" (click)="startTimer($index + 1, step.timerMinutes)">
+                  {{ i18n.t('timerStepLabel') }} {{ step.timerMinutes }} min
+                </button>
+              }
+            </div>
           </li>
         }
       </ol>

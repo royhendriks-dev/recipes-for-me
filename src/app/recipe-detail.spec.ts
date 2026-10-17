@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { RECIPE_FIXTURES } from '../testing/fixtures';
 import { I18nService } from './i18n.service';
 import { RecipeDetail } from './recipe-detail';
+import { TimerService } from './timer.service';
 
 describe('RecipeDetail', () => {
   async function setup() {
@@ -92,5 +93,17 @@ describe('RecipeDetail', () => {
     http.expectOne((r) => r.url === '/api/recipes/voorbeeld-curry').flush('weg', { status: 404, statusText: 'Not Found' });
     await fixture.whenStable();
     expect(el.querySelector('[role=alert]')?.textContent).toContain('could not be loaded');
+  });
+
+  it('start een timer bij een stap die er een heeft', async () => {
+    const { fixture, el } = await setup();
+    const timers = TestBed.inject(TimerService);
+    const button = el.querySelector('.steps .btn') as HTMLButtonElement;
+    expect(button.textContent).toContain('12 min');
+    button.click();
+    await fixture.whenStable();
+    expect(timers.timers()).toHaveLength(1);
+    expect(timers.timers()[0].totalSec).toBe(720);
+    timers.remove(timers.timers()[0].id);
   });
 });
