@@ -51,12 +51,12 @@ describe('TimerService', () => {
   it('telt er een minuut bij op, lopend en gepauzeerd', () => {
     service.start('Groenten', 30);
     const id = service.timers()[0].id;
-    service.addMinute(id);
+    service.addMinutes(id, 1);
     expect(service.leftSec(service.timers()[0])).toBe(90);
     expect(service.timers()[0].totalSec).toBe(90);
 
     service.toggle(id);
-    service.addMinute(id);
+    service.addMinutes(id, 1);
     expect(service.leftSec(service.timers()[0])).toBe(150);
   });
 
@@ -64,10 +64,41 @@ describe('TimerService', () => {
     service.start('Kort', 1);
     vi.advanceTimersByTime(1000);
     const id = service.timers()[0].id;
-    service.addMinute(id);
+    service.addMinutes(id, 1);
     expect(service.leftSec(service.timers()[0])).toBe(0);
     service.remove(id);
     expect(service.timers()).toEqual([]);
+  });
+
+  it('reset naar de ingestelde duur en past de duur aan', () => {
+    const id = service.add('Ei', 120);
+    service.toggle(id);
+    vi.advanceTimersByTime(30_000);
+    service.reset(id);
+    expect(service.leftSec(service.timers()[0])).toBe(120);
+    expect(service.isRunning(service.timers()[0])).toBe(false);
+
+    service.setDuration(id, 0);
+    expect(service.timers()[0].initialSec).toBe(120);
+    service.setDuration(id, 45);
+    service.addMinutes(id, 1);
+    service.reset(id);
+    expect(service.leftSec(service.timers()[0])).toBe(45);
+  });
+
+  it('piept bij afloop', () => {
+    const start = vi.fn();
+    class FakeAudio {
+      currentTime = 0;
+      destination = {};
+      createOscillator = () => ({ frequency: {}, connect: vi.fn(), start, stop: vi.fn() });
+      createGain = () => ({ gain: {}, connect: vi.fn() });
+    }
+    vi.stubGlobal('AudioContext', FakeAudio);
+    service.start('Kort', 1);
+    vi.advanceTimersByTime(1000);
+    expect(start).toHaveBeenCalledTimes(2);
+    vi.unstubAllGlobals();
   });
 
   it('vraagt een scherm-aan-slot aan zolang een timer loopt', async () => {
