@@ -1,69 +1,72 @@
-import { Lang, Recipe } from '../app/recipe.model';
+import { Lang, Recipe, RecipeSummary } from '../app/recipe.model';
 
 /** Testdata in het formaat van de backend-API. */
 export const RECIPE_FIXTURES: Record<Lang, Recipe> = {
   nl: {
-    id: 'voorbeeld-curry',
-    title: 'Romige curry met kikkererwten en groenten',
-    description:
-      'Een vegetarische doordeweekse curry met zachte kikkererwten, paprika en spinazie in kokosmelk. Lekker met basmatirijst en verse koriander.',
-    difficulty: 'Makkelijk',
+    id: 'curry-kikkererwten',
+    title: 'Romige curry met kikkererwten',
+    category: 'main',
+    tags: ['vegetarisch', 'curry'],
     minutes: 45,
     servings: 4,
     ingredients: [
-      { name: 'Kikkererwten (blik, uitgelekt)', quantity: 240, unit: 'g' },
-      { name: 'Rode paprika', quantity: 2, unit: 'stuk', unitPlural: 'stuks' },
-      { name: 'Courgette', quantity: 1, unit: 'stuk', unitPlural: 'stuks' },
-      { name: 'Ui', quantity: 1, unit: 'stuk', unitPlural: 'stuks' },
-      { name: 'Knoflook', quantity: 2, unit: 'teen', unitPlural: 'tenen' },
-      { name: 'Verse gember', quantity: 20, unit: 'g' },
-      { name: 'Gele currypasta', quantity: 2, unit: 'el' },
-      { name: 'Kokosmelk', quantity: 400, unit: 'ml' },
-      { name: 'Verse spinazie', quantity: 100, unit: 'g' },
-      { name: 'Basmatirijst', quantity: 280, unit: 'g' },
-      { name: 'Limoen', quantity: 0.5, unit: 'stuk', unitPlural: 'stuks' },
-      { name: 'Verse koriander', quantity: 15, unit: 'g' },
-      { name: 'Zout en peper', quantity: null, unit: '', note: 'naar smaak' },
+      { amount: 240, unit: 'g', name: 'Kikkererwten (blik, uitgelekt)', group: 'Curry', optional: false },
+      { amount: 2, unit: 'stuk', name: 'Rode paprika', group: 'Curry', optional: false },
+      { amount: 1, unit: 'stuk', name: 'Ui', group: 'Curry', optional: false },
+      { amount: 400, unit: 'ml', name: 'Kokosmelk', group: 'Curry', optional: false },
+      { amount: 280, unit: 'g', name: 'Basmatirijst', group: 'Rijst', optional: false },
+      { amount: 15, unit: 'g', name: 'Verse koriander', group: 'Rijst', optional: true },
+      { amount: null, unit: null, name: 'Zout en peper', group: 'Curry', optional: false },
     ],
     steps: [
-      { text: 'Kook de rijst volgens de verpakking in ongeveer 12 minuten gaar. Laat afgedekt staan tot het eten klaar is.', timerMinutes: 12 },
-      { text: 'Snipper de ui, snijd de paprika en courgette in blokjes en rasp de knoflook en gember. Laat de kikkererwten uitlekken en spoel ze af.' },
-      { text: 'Bak de ui in een beetje olie glazig. Voeg knoflook, gember en currypasta toe en bak 1 minuut mee.' },
-      { text: 'Roerbak de paprika en courgette 8 minuten op middelhoog vuur, tot ze net zacht worden.' },
-      { text: 'Voeg kikkererwten en kokosmelk toe, breng aan de kook en laat zachtjes sudderen. Roer af en toe.' },
-      { text: 'Roer de spinazie erdoor tot hij geslonken is. Breng op smaak met zout, peper en een scheutje limoensap. Serveer met rijst en koriander.' },
+      { text: 'Kook de rijst in ongeveer 12 minuten gaar.', group: 'Rijst', timerMinutes: 12 },
+      { text: 'Bak de ui glazig en voeg de paprika toe.', group: 'Curry' },
+      { text: 'Voeg kikkererwten en kokosmelk toe en laat 20 minuten sudderen.', group: 'Curry', timerMinutes: 20 },
     ],
+    notes: ['Lekker met verse koriander.'],
   },
   en: {
-    id: 'voorbeeld-curry',
-    title: 'Creamy chickpea and vegetable curry',
-    description:
-      'A vegetarian weeknight curry with tender chickpeas, bell pepper and spinach in coconut milk. Lovely with basmati rice and fresh coriander.',
-    difficulty: 'Easy',
+    id: 'curry-kikkererwten',
+    title: 'Creamy chickpea curry',
+    category: 'main',
+    tags: ['vegetarian', 'curry'],
     minutes: 45,
     servings: 4,
     ingredients: [
-      { name: 'Chickpeas (tin, drained)', quantity: 240, unit: 'g' },
-      { name: 'Red bell pepper', quantity: 2, unit: 'piece', unitPlural: 'pieces' },
-      { name: 'Courgette', quantity: 1, unit: 'piece', unitPlural: 'pieces' },
-      { name: 'Onion', quantity: 1, unit: 'piece', unitPlural: 'pieces' },
-      { name: 'Garlic', quantity: 2, unit: 'clove', unitPlural: 'cloves' },
-      { name: 'Fresh ginger', quantity: 20, unit: 'g' },
-      { name: 'Yellow curry paste', quantity: 2, unit: 'tbsp' },
-      { name: 'Coconut milk', quantity: 400, unit: 'ml' },
-      { name: 'Fresh spinach', quantity: 100, unit: 'g' },
-      { name: 'Basmati rice', quantity: 280, unit: 'g' },
-      { name: 'Lime', quantity: 0.5, unit: 'piece', unitPlural: 'pieces' },
-      { name: 'Fresh coriander', quantity: 15, unit: 'g' },
-      { name: 'Salt and pepper', quantity: null, unit: '', note: 'to taste' },
+      { amount: 240, unit: 'g', name: 'Chickpeas (tin, drained)', group: 'Curry', optional: false },
+      { amount: 2, unit: 'piece', name: 'Red bell pepper', group: 'Curry', optional: false },
+      { amount: 1, unit: 'piece', name: 'Onion', group: 'Curry', optional: false },
+      { amount: 400, unit: 'ml', name: 'Coconut milk', group: 'Curry', optional: false },
+      { amount: 280, unit: 'g', name: 'Basmati rice', group: 'Rice', optional: false },
+      { amount: 15, unit: 'g', name: 'Fresh coriander', group: 'Rice', optional: true },
+      { amount: null, unit: null, name: 'Salt and pepper', group: 'Curry', optional: false },
     ],
     steps: [
-      { text: 'Cook the rice according to the packet, about 12 minutes. Keep it covered until the meal is ready.', timerMinutes: 12 },
-      { text: 'Chop the onion, dice the pepper and courgette and grate the garlic and ginger. Drain and rinse the chickpeas.' },
-      { text: 'Fry the onion in a little oil until translucent. Add garlic, ginger and curry paste and fry for 1 minute.' },
-      { text: 'Stir-fry the pepper and courgette for 8 minutes over medium heat, until just tender.' },
-      { text: 'Add the chickpeas and coconut milk, bring to the boil and simmer gently. Stir now and then.' },
-      { text: 'Stir in the spinach until wilted. Season with salt, pepper and a splash of lime juice. Serve with rice and coriander.' },
+      { text: 'Cook the rice for about 12 minutes.', group: 'Rice', timerMinutes: 12 },
+      { text: 'Fry the onion until translucent and add the pepper.', group: 'Curry' },
+      { text: 'Add the chickpeas and coconut milk and simmer for 20 minutes.', group: 'Curry', timerMinutes: 20 },
     ],
+    notes: ['Lovely with fresh coriander.'],
   },
 };
+
+/** Recept zoals een deel van de echte data eruit ziet: geen aantal personen, minuten of hoeveelheden. */
+export const RECIPE_SPARSE: Recipe = {
+  id: 'sparse',
+  title: 'Appeltaart',
+  category: 'sweet',
+  tags: [],
+  minutes: null,
+  servings: null,
+  ingredients: [
+    { amount: null, unit: null, name: '250 g bloem', group: null, optional: false },
+    { amount: 3, unit: 'stuk', name: 'appels', group: null, optional: false },
+  ],
+  steps: [{ text: 'Bak de taart.', group: null }],
+  notes: [],
+};
+
+export function toSummary(recipe: Recipe): RecipeSummary {
+  const { id, title, category, tags, minutes, servings } = recipe;
+  return { id, title, category, tags, minutes, servings };
+}

@@ -1,26 +1,43 @@
-import { Ingredient } from './recipe.model';
+import { Ingredient, Lang } from './recipe.model';
 
 const FRACTIONS: Record<number, string> = { 0: '', 0.25: '¼', 0.5: '½', 0.75: '¾' };
+const MASS_VOLUME_UNITS = ['g', 'gr', 'gram', 'ml'];
 
-/** Rondt af op kwarten en schrijft 1.5 als "1½". */
-export function formatFraction(value: number): string {
-  const rounded = Math.max(0.25, Math.round(value * 4) / 4);
-  const whole = Math.floor(rounded);
-  const fraction = FRACTIONS[rounded - whole];
-  return whole === 0 ? fraction : `${whole}${fraction}`;
+/** Schrijft een hoeveelheid als breuk (1½) als hij bijna op een kwart zit, anders als decimaal getal. */
+export function formatAmount(value: number, lang: Lang = 'nl'): string {
+  const quarter = Math.round(value * 4) / 4;
+  if (quarter > 0 && Math.abs(value - quarter) <= 0.05) {
+    const whole = Math.floor(quarter);
+    const fraction = FRACTIONS[quarter - whole];
+    return whole === 0 ? fraction : `${whole}${fraction}`;
+  }
+  return Number(value.toFixed(2)).toLocaleString(lang);
 }
 
-/** Schaalt een ingrediënt van `baseServings` naar `servings` personen en geeft de weergavetekst. */
-export function formatQuantity(ingredient: Ingredient, servings: number, baseServings: number): string {
-  if (ingredient.quantity === null) {
+function roundMassOrVolume(value: number): number {
+  if (value >= 100) {
+    return Math.round(value / 10) * 10;
+  }
+  return value >= 10 ? Math.round(value / 5) * 5 : Math.max(1, Math.round(value));
+}
+
+/**
+ * Schaalt een ingrediënt van `baseServings` naar `servings` personen en geeft de weergavetekst.
+ * Zonder hoeveelheid of zonder bekend aantal personen wordt niet geschaald: dan staat er niets
+ * of de hoeveelheid zoals de backend die levert.
+ */
+export function formatQuantity(
+  ingredient: Ingredient,
+  servings: number | null,
+  baseServings: number | null,
+  lang: Lang = 'nl',
+): string {
+  if (ingredient.amount === null) {
     return '';
   }
-  const scaled = (ingredient.quantity * servings) / baseServings;
-  if (ingredient.unit === 'g' || ingredient.unit === 'ml') {
-    const step = scaled >= 100 ? 10 : 5;
-    return `${Math.max(step, Math.round(scaled / step) * step)} ${ingredient.unit}`;
-  }
-  const rounded = Math.max(0.25, Math.round(scaled * 4) / 4);
-  const unit = rounded > 1 && ingredient.unitPlural ? ingredient.unitPlural : ingredient.unit;
-  return `${formatFraction(rounded)} ${unit}`.trim();
+  const scale = servings !== null && baseServings ? servings / baseServings : 1;
+  const scaled = ingredient.amount * scale;
+  const unit = ingredient.unit ?? '';
+  const amount = MASS_VOLUME_UNITS.includes(unit.toLowerCase()) ? String(roundMassOrVolume(scaled)) : formatAmount(scaled, lang);
+  return `${amount} ${unit}`.trim();
 }

@@ -12,7 +12,7 @@ Voorgestelde adres: `recipes.royhendriks.com`. Dit is een voorstel, geen bestaan
 
 ## Functies (eerste versie)
 
-1. Recepten bekijken zonder in te loggen (titel, beschrijving, ingrediënten met hoeveelheden, bereiding, optioneel afbeelding en metadata).
+1. Recepten bekijken zonder in te loggen (titel, categorie, ingrediënten met hoeveelheden, bereiding, notities en metadata).
 2. Inloggen als eigenaar met het bestaande portfolio-account.
 3. Recepten aanmaken, bewerken, publiceren, depubliceren en verwijderen (alleen eigenaar, server-side afgedwongen).
 4. Favorieten met een ster, opgeslagen in de database per gebruiker, met een favorietenweergave.
@@ -76,16 +76,21 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 - Licht en donker thema via `prefers-color-scheme`; systeemlettertypen, geen externe requests.
 - Keukentimers: onderaan het scherm blijft een paneel staan (ook bij wisselen van pagina) met timers die je bij een stap start (`timerMinutes`) of zelf toevoegt (naam, minuten en seconden, snelkeuze 5/10/15 min). Per timer pauzeren/hervatten, +1 min en verwijderen. De tijd rekent op een eindtijd, dus klopt ook als het scherm even uit was. Bij afloop volgt een melding voor schermlezers en, waar de browser dat kent, trilling; zolang een timer loopt vraagt de app (waar ondersteund) het scherm aan te houden. Timers staan alleen in het geheugen: herladen wist ze.
 
-## API-contract (voorstel, door de backend-thread te bevestigen)
+## API-contract
 
-De frontend roept relatieve paden op dezelfde origin aan (`/api/...`, niet relatief aan `/apps/recipes/`):
+Het backend-contract staat in de portfolio-repo (`backend/README.md`, portfolio PR #82 op het moment van schrijven; die file is bij het bijwerken van deze README niet zelf gelezen, de velden hieronder komen uit de beschrijving van de backend-thread). Alleen lezen en openbaar. De frontend roept relatieve paden op dezelfde origin aan (`/api/...`, niet relatief aan `/apps/recipes/`):
 
 | Aanroep | Antwoord |
 |---|---|
-| `GET /api/recipes?lang=nl\|en` | lijst van `{ id, title, description, difficulty, minutes, servings, imageUrl? }` |
-| `GET /api/recipes/{id}?lang=nl\|en` | zelfde velden plus `ingredients: [{ name, quantity (getal of null), unit, unitPlural?, note? }]` en `steps: [{ text, timerMinutes? }]` |
+| `GET /api/recipes?lang=nl\|en` | lijst van `{ id, title, category, tags, minutes, servings }`; `id` is de slug, `category` is `main`, `side` of `sweet` |
+| `GET /api/recipes/{id}?lang=nl\|en` | dezelfde velden plus `ingredients: [{ amount, unit, name, group, optional }]`, `steps: [{ text, group }]` en `notes: [tekst]` |
 
-`quantity` geldt voor `servings` personen; de app schaalt zelf naar 1-4 personen. De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.service.ts`. Testdata in dit formaat staat in `src/testing/fixtures.ts`.
+- Onbekende taal valt terug op NL; onbekend id geeft 404 `{"error":"not_found"}` (de app toont "Dit recept bestaat niet"); zonder database 503 (de app toont een foutmelding met "opnieuw proberen").
+- `minutes` en `servings` kunnen leeg zijn. `amount` geldt voor `servings` personen en kan leeg zijn; dan staat de hele regel in `name`. Een recept zonder `servings` krijgt geen personen-slider en wordt niet geschaald; een leeg `amount` toont geen getal. Het aantal personen in de slider loopt van 1 tot 4.
+- `steps[].timerMinutes` is een voorstel van de frontend en bestaat nog niet in de backend; het veld is optioneel en de timerknop verschijnt alleen als het er is. Eigen timers werken los daarvan.
+- Beschrijving, moeilijkheid en afbeelding bestaan niet in dit contract en worden niet getoond.
+
+De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.service.ts`. Testdata in dit formaat staat in `src/testing/fixtures.ts`.
 
 ## Container en images
 
