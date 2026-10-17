@@ -1,0 +1,90 @@
+@if (recipe.isLoading()) {
+  <p class="state" role="status">{{ i18n.t('loading') }}</p>
+} @else if (recipe.error()) {
+  <div class="state" role="alert">
+    <p>{{ i18n.t('error') }}</p>
+    <button class="btn" type="button" (click)="recipe.reload()">{{ i18n.t('retry') }}</button>
+  </div>
+} @else if (recipe.value(); as r) {
+  <article class="card">
+    <div class="hero">
+      @if (r.imageUrl) {
+        <img class="photo" [src]="r.imageUrl" alt="" />
+      }
+      <div>
+        <h1>{{ r.title }}</h1>
+        <div class="meta">
+          <span>{{ r.difficulty }}</span>
+          <span>{{ r.minutes }} {{ i18n.t('minutes') }}</span>
+          <button class="fav" type="button" [attr.aria-pressed]="isFavorite()" (click)="toggleFavorite()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1L3.2 9.6l6.1-.8z" />
+            </svg>
+            {{ isFavorite() ? i18n.t('favoriteSaved') : i18n.t('favorite') }}
+          </button>
+        </div>
+        <p class="desc">{{ r.description }}</p>
+        <div class="persons">
+          <label for="servings">
+            {{ i18n.t('servings') }}
+            <output for="servings">{{ servingsLabel() }}</output>
+          </label>
+          <input
+            id="servings"
+            type="range"
+            min="1"
+            max="4"
+            step="1"
+            [value]="servings()"
+            [attr.aria-valuetext]="servingsLabel()"
+            (input)="setServings($event)"
+          />
+          <div class="ticks" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+        </div>
+      </div>
+    </div>
+
+    <details class="acc" open>
+      <summary>
+        <h2>{{ i18n.t('ingredients') }}</h2>
+        <span class="count">{{ checked().size }} / {{ r.ingredients.length }} {{ i18n.t('checked') }}</span>
+        <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+      </summary>
+      <ul class="ing">
+        @for (ingredient of r.ingredients; track $index) {
+          <li [class.done]="checked().has($index)">
+            <input type="checkbox" [id]="'ing' + $index" [checked]="checked().has($index)" (change)="toggleChecked($index)" />
+            <span class="qty">{{ quantity($index) }}</span>
+            <label [for]="'ing' + $index">
+              {{ ingredient.name }}
+              @if (ingredient.note) {
+                <span class="note">({{ ingredient.note }})</span>
+              }
+            </label>
+          </li>
+        }
+      </ul>
+      <div class="share">
+        <button class="btn" type="button" (click)="share()">{{ i18n.t('share') }}</button>
+        <p class="hint">{{ i18n.t('shareHint') }}</p>
+        @if (fallbackText()) {
+          <p class="hint" role="alert">{{ i18n.t('copyFailed') }}</p>
+          <textarea class="fallback" readonly [value]="fallbackText()" [attr.aria-label]="i18n.t('ingredientsAsText')"></textarea>
+        }
+      </div>
+    </details>
+
+    <section class="steps-section" aria-labelledby="steps-heading">
+      <h2 id="steps-heading">{{ i18n.t('steps') }}</h2>
+      <ol class="steps">
+        @for (step of r.steps; track $index) {
+          <li>
+            <span class="n" aria-hidden="true">{{ $index + 1 }}</span>
+            <p>{{ step.text }}</p>
+          </li>
+        }
+      </ol>
+    </section>
+  </article>
+}
+<div class="toast" role="status">{{ toast() }}</div>
