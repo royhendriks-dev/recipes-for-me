@@ -16,7 +16,7 @@
     <main>
       <router-outlet />
     </main>
-    <aside class="side">
+    <aside class="side" [class.below-back]="onDetail()">
       <app-timer-panel />
     </aside>
   </div>
