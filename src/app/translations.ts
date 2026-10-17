@@ -51,7 +51,6 @@ export type TranslationKey =
   | 'timerTitle'
   | 'timerLabel'
   | 'timerAddTime'
-  | 'timerPresets'
   | 'timerCustom'
   | 'timerSet'
   | 'timerReset'
@@ -114,7 +113,6 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     timerTitle: 'Keukentimer',
     timerLabel: 'Timer naam',
     timerAddTime: 'Tijd toevoegen',
-    timerPresets: 'Presets',
     timerCustom: 'Aangepast',
     timerSet: 'Instellen',
     timerReset: 'Reset',
@@ -177,7 +175,6 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     timerTitle: 'Kitchen timer',
     timerLabel: 'Timer name',
     timerAddTime: 'Add time',
-    timerPresets: 'Presets',
     timerCustom: 'Custom',
     timerSet: 'Set',
     timerReset: 'Reset',

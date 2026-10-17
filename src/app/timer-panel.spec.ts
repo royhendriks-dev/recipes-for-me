@@ -53,16 +53,13 @@ describe('TimerPanel', () => {
     expect(el.querySelector('.time')?.textContent).toBe('10:00');
   });
 
-  it('telt tijd erbij en stelt presets en eigen tijd in', async () => {
+  it('telt tijd erbij en stelt een eigen tijd in', async () => {
     const { fixture, timers, el } = await setup();
     timers.add('Rijst', 300);
     await fixture.whenStable();
 
     await click(fixture, byText(el, '+5m'));
     expect(el.querySelector('.time')?.textContent).toBe('10:00');
-
-    await click(fixture, byText(el, '3m'));
-    expect(el.querySelector('.time')?.textContent).toBe('03:00');
 
     const [min, sec] = Array.from(el.querySelectorAll('.custom input')) as HTMLInputElement[];
     min.value = '2';

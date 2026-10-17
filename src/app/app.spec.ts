@@ -54,4 +54,21 @@ describe('App', () => {
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('.lang')).toBeNull();
   });
+
+  it('schuift het timerpaneel onder de terug-link op de receptpagina', async () => {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/');
+    fixture.detectChanges();
+    const http = TestBed.inject(HttpTestingController);
+    http.expectOne((r) => r.url === '/api/recipes').flush([]);
+    await fixture.whenStable();
+    const side = (fixture.nativeElement as HTMLElement).querySelector('.side') as HTMLElement;
+    expect(side.classList.contains('below-back')).toBe(false);
+
+    await router.navigateByUrl('/recept/curry-kikkererwten');
+    fixture.detectChanges();
+    http.match(() => true);
+    expect(side.classList.contains('below-back')).toBe(true);
+  });
 });

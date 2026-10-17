@@ -9,7 +9,7 @@
       @for (timer of timerService.timers(); track timer.id) {
         <li class="timer" [class.ready]="timerService.isDone(timer)">
           <div class="top">
-            <h3><span aria-hidden="true">⏱️</span> {{ i18n.t('timerTitle') }}</h3>
+            <h3>{{ i18n.t('timerTitle') }}</h3>
             <button class="remove" type="button" (click)="timerService.remove(timer.id)">{{ i18n.t('timerRemove') }}</button>
           </div>
 
@@ -29,8 +29,8 @@
             </div>
           </div>
 
-          <div class="group add-time" role="group" [attr.aria-label]="i18n.t('timerAddTime')">
-            <span class="label" aria-hidden="true">{{ i18n.t('timerAddTime') }}:</span>
+          <div class="add-time" role="group" [attr.aria-label]="i18n.t('timerAddTime')">
+            <span class="label" aria-hidden="true">{{ i18n.t('timerAddTime') }}</span>
             @for (m of addMinutes; track m) {
               <button class="soft" type="button" [disabled]="timerService.isDone(timer)" (click)="timerService.addMinutes(timer.id, m)">
                 <span class="visually-hidden">{{ i18n.t('timerAddTime') }} </span>+{{ m }}m
@@ -38,21 +38,15 @@
             }
           </div>
 
-          <div role="group" [attr.aria-label]="i18n.t('timerPresets')">
-            <span class="label">{{ i18n.t('timerPresets') }}</span>
-            <div class="presets">
-              @for (m of presets; track m) {
-                <button class="chip" type="button" (click)="timerService.setDuration(timer.id, m * 60)">{{ m }}m</button>
-              }
-            </div>
-          </div>
-
           <div class="custom" role="group" [attr.aria-label]="i18n.t('timerCustom')">
-            <span class="label" aria-hidden="true">{{ i18n.t('timerCustom') }}:</span>
-            <input #min type="number" min="0" max="180" inputmode="numeric" [value]="Math.floor(timer.initialSec / 60)" [attr.aria-label]="i18n.t('timerMinShort')" />
-            <span aria-hidden="true">m</span>
-            <input #sec type="number" min="0" max="59" inputmode="numeric" [value]="timer.initialSec % 60" [attr.aria-label]="i18n.t('timerSecShort')" />
-            <span aria-hidden="true">s</span>
+            <label>
+              {{ i18n.t('timerMinShort') }}
+              <input #min type="number" min="0" max="180" inputmode="numeric" [value]="Math.floor(timer.initialSec / 60)" />
+            </label>
+            <label>
+              {{ i18n.t('timerSecShort') }}
+              <input #sec type="number" min="0" max="59" inputmode="numeric" [value]="timer.initialSec % 60" />
+            </label>
             <button class="soft" type="button" (click)="setCustom(timer, min.value, sec.value)">{{ i18n.t('timerSet') }}</button>
           </div>
 
