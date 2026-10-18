@@ -17,3 +17,5 @@ h2 { font-family: var(--font-display); font-size: 22px; margin: 0 0 10px; paddin
 .chev { color: var(--accent); font-size: 24px; flex: none; }
 .state { text-align: center; color: var(--muted); padding: 48px 16px; }
 .btn { min-height: 48px; padding: 10px 18px; border-radius: 10px; border: 1px solid transparent; font-weight: 600; background: var(--accent); color: var(--accent-fg); }
+.star { width: 18px; height: 18px; margin-left: 6px; vertical-align: -2px; fill: var(--star); stroke: var(--star); stroke-width: 2; stroke-linejoin: round; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }

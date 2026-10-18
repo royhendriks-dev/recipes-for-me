@@ -2,13 +2,14 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { answerSession } from '../testing/auth';
 import { RECIPE_FIXTURES, RECIPE_SPARSE } from '../testing/fixtures';
 import { I18nService } from './i18n.service';
 import { RecipeDetail } from './recipe-detail';
 import { TimerService } from './timer.service';
 
 describe('RecipeDetail', () => {
-  async function setup(recipe = RECIPE_FIXTURES.nl) {
+  async function setup(recipe = RECIPE_FIXTURES.nl, admin = true) {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [RecipeDetail],
@@ -19,6 +20,7 @@ describe('RecipeDetail', () => {
     fixture.componentRef.setInput('id', 'curry-kikkererwten');
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
+    await answerSession(http, admin);
     http.expectOne((r) => r.url === '/api/recipes/curry-kikkererwten').flush(recipe);
     await fixture.whenStable();
     return { fixture, http, el: fixture.nativeElement as HTMLElement };
@@ -43,12 +45,41 @@ describe('RecipeDetail', () => {
     expect(el.querySelector('.ing li')?.classList).toContain('done');
   });
 
-  it('bewaart een favoriet', async () => {
-    const { fixture, el } = await setup();
+  it('bewaart een favoriet in de backend, met het CSRF-token', async () => {
+    const { fixture, http, el } = await setup();
     (el.querySelector('.fav') as HTMLButtonElement).click();
+    const put = http.expectOne('/api/recipes/favorites/curry-kikkererwten');
+    expect(put.request.method).toBe('PUT');
+    expect(put.request.headers.get('X-CSRF-Token')).toBe('csrf-token-1');
+    put.flush(null, { status: 204, statusText: 'No Content' });
     await fixture.whenStable();
     expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('true');
-    expect(localStorage.getItem('recipes.favorites')).toContain('curry-kikkererwten');
+    expect(localStorage.getItem('recipes.favorites')).toBeNull();
+
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    const del = http.expectOne('/api/recipes/favorites/curry-kikkererwten');
+    expect(del.request.method).toBe('DELETE');
+    del.flush(null, { status: 204, statusText: 'No Content' });
+    await fixture.whenStable();
+    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('draait een favoriet terug en meldt het als opslaan mislukt', async () => {
+    const { fixture, http, el } = await setup();
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    http.expectOne('/api/recipes/favorites/curry-kikkererwten').flush({ error: 'forbidden' }, { status: 403, statusText: 'Forbidden' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('false');
+    expect(el.querySelector('.toast')?.textContent).toContain('niet gelukt');
+  });
+
+  it('toont zonder login geen favorietenknop en geen deelknop', async () => {
+    const { el } = await setup(RECIPE_FIXTURES.nl, false);
+    expect(el.querySelector('.fav')).toBeNull();
+    expect(el.querySelector('.share')).toBeNull();
+    expect(el.querySelector('.ing input')).not.toBeNull();
+    expect(el.querySelector('.steps')).not.toBeNull();
   });
 
   it('deelt via Web Share en valt terug op het klembord en daarna op een tekstvak', async () => {
