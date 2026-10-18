@@ -2,12 +2,13 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { answerSession } from '../testing/auth';
 import { RECIPE_FIXTURES, RECIPE_SPARSE, toSummary } from '../testing/fixtures';
 import { I18nService } from './i18n.service';
 import { RecipeList } from './recipe-list';
 
 describe('RecipeList', () => {
-  async function setup() {
+  async function setup(admin = false, favorites: string[] = []) {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [RecipeList],
@@ -17,6 +18,7 @@ describe('RecipeList', () => {
     const fixture = TestBed.createComponent(RecipeList);
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
+    await answerSession(http, admin, favorites);
     return { fixture, http, el: fixture.nativeElement as HTMLElement };
   }
 
@@ -62,5 +64,27 @@ describe('RecipeList', () => {
     fixture.detectChanges();
     expect(headings()).toEqual(['Zoet (1)']);
     expect(zoet?.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('zet favoriete recepten bovenaan met een ster, alleen voor de beheerder', async () => {
+    const { fixture, http, el } = await setup(true, ['sparse']);
+    http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const headings = Array.from(el.querySelectorAll('h2')).map((h) => h.textContent?.replace(/\s+/g, ' ').trim());
+    expect(headings).toEqual(['Favorieten (1)', 'Hoofdgerecht (1)', 'Zoet (1)']);
+    const first = el.querySelector('.section ul a.recipe');
+    expect(first?.querySelector('.title')?.textContent).toContain('Appeltaart');
+    expect(first?.querySelector('.star')).not.toBeNull();
+    expect(first?.querySelector('.visually-hidden')?.textContent).toContain('Favoriet');
+    expect(el.querySelectorAll('.star')).toHaveLength(2);
+  });
+
+  it('toont zonder login geen favorieten en geen sterren', async () => {
+    const { fixture, http, el } = await setup(false);
+    http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
+    await fixture.whenStable();
+    expect(Array.from(el.querySelectorAll('h2')).map((h) => h.textContent?.replace(/\s+/g, ' ').trim())).toEqual(['Hoofdgerecht (1)', 'Zoet (1)']);
+    expect(el.querySelector('.star')).toBeNull();
   });
 });

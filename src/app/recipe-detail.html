@@ -16,12 +16,14 @@
       @if (r.minutes !== null) {
         <span>{{ r.minutes }} {{ i18n.t('minutes') }}</span>
       }
+      @if (admin()) {
       <button class="fav" type="button" [attr.aria-pressed]="isFavorite()" (click)="toggleFavorite()">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1L3.2 9.6l6.1-.8z" />
         </svg>
         {{ isFavorite() ? i18n.t('favoriteSaved') : i18n.t('favorite') }}
       </button>
+      }
     </div>
     @if (r.tags.length) {
       <ul class="tags">
@@ -75,6 +77,7 @@
           }
         </ul>
       }
+      @if (admin()) {
       <div class="share">
         <button class="btn" type="button" (click)="share()">{{ i18n.t('share') }}</button>
         <p class="hint">{{ i18n.t('shareHint') }}</p>
@@ -83,6 +86,7 @@
           <textarea class="fallback" readonly [value]="fallbackText()" [attr.aria-label]="i18n.t('ingredientsAsText')"></textarea>
         }
       </div>
+      }
     </details>
 
     <section class="steps-section" aria-labelledby="steps-heading">

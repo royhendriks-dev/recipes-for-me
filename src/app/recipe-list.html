@@ -1,24 +1,4 @@
-<h1>{{ i18n.t('allRecipes') }}</h1>
-@if (list.isLoading()) {
-  <p class="state" role="status">{{ i18n.t('loading') }}</p>
-} @else if (list.error()) {
-  <div class="state" role="alert">
-    <p>{{ i18n.t('listError') }}</p>
-    <button class="btn" type="button" (click)="list.reload()">{{ i18n.t('retry') }}</button>
-  </div>
-} @else if (list.value()?.length) {
-  <div class="filter" role="group" [attr.aria-label]="i18n.t('filterLabel')">
-    <button type="button" [attr.aria-pressed]="filter() === null" (click)="filter.set(null)">{{ i18n.t('filterAll') }}</button>
-    @for (category of categories; track category) {
-      <button type="button" [attr.aria-pressed]="filter() === category" (click)="filter.set(category)">{{ i18n.t(category) }}</button>
-    }
-  </div>
-  @for (section of sections(); track section.category) {
-    <section class="section">
-      <h2>{{ i18n.t(section.category) }} <span class="count">({{ section.recipes.length }})</span></h2>
-      <ul class="recipes">
-        @for (recipe of section.recipes; track recipe.id) {
-          <li>
+<ng-template #row let-recipe>
             <a class="recipe" [routerLink]="['/recept', recipe.id]">
               <span class="icon" [attr.data-category]="recipe.category" aria-hidden="true">
                 @switch (recipe.category) {
@@ -34,13 +14,51 @@
                 }
               </span>
               <span class="text">
-                <span class="title">{{ recipe.title }}</span>
+                <span class="title">{{ recipe.title }}@if (isFavorite(recipe.id)) {
+                    <svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1L3.2 9.6l6.1-.8z" /></svg>
+                    <span class="visually-hidden">({{ i18n.t('favorite') }})</span>
+                  }</span>
                 <span class="meta">
                   {{ i18n.t(recipe.category) }}@if (recipe.minutes !== null) { · {{ recipe.minutes }} {{ i18n.t('minutes') }}}
                 </span>
               </span>
               <span class="chev" aria-hidden="true">›</span>
             </a>
+</ng-template>
+<h1>{{ i18n.t('allRecipes') }}</h1>
+@if (list.isLoading()) {
+  <p class="state" role="status">{{ i18n.t('loading') }}</p>
+} @else if (list.error()) {
+  <div class="state" role="alert">
+    <p>{{ i18n.t('listError') }}</p>
+    <button class="btn" type="button" (click)="list.reload()">{{ i18n.t('retry') }}</button>
+  </div>
+} @else if (list.value()?.length) {
+  <div class="filter" role="group" [attr.aria-label]="i18n.t('filterLabel')">
+    <button type="button" [attr.aria-pressed]="filter() === null" (click)="filter.set(null)">{{ i18n.t('filterAll') }}</button>
+    @for (category of categories; track category) {
+      <button type="button" [attr.aria-pressed]="filter() === category" (click)="filter.set(category)">{{ i18n.t(category) }}</button>
+    }
+  </div>
+  @if (favoriteRecipes().length) {
+    <section class="section" aria-labelledby="favorites-heading">
+      <h2 id="favorites-heading">{{ i18n.t('favorites') }} <span class="count">({{ favoriteRecipes().length }})</span></h2>
+      <ul class="recipes">
+        @for (recipe of favoriteRecipes(); track recipe.id) {
+          <li>
+            <ng-container [ngTemplateOutlet]="row" [ngTemplateOutletContext]="{ $implicit: recipe }" />
+          </li>
+        }
+      </ul>
+    </section>
+  }
+  @for (section of sections(); track section.category) {
+    <section class="section">
+      <h2>{{ i18n.t(section.category) }} <span class="count">({{ section.recipes.length }})</span></h2>
+      <ul class="recipes">
+        @for (recipe of section.recipes; track recipe.id) {
+          <li>
+            <ng-container [ngTemplateOutlet]="row" [ngTemplateOutletContext]="{ $implicit: recipe }" />
           </li>
         }
       </ul>

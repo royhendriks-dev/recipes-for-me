@@ -1,31 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, input, resource, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AuthService } from './auth.service';
+import { FavoritesService } from './favorites.service';
 import { I18nService } from './i18n.service';
 import { formatQuantity } from './quantity';
 import { groupItems } from './recipe.model';
 import { RecipeService } from './recipe.service';
 import { TimerService } from './timer.service';
 import { buildShareText } from './share';
-
-const FAVORITES_KEY = 'recipes.favorites';
-
-function readFavorites(): string[] {
-  try {
-    const parsed: unknown = JSON.parse(localStorage.getItem(FAVORITES_KEY) ?? '[]');
-    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeFavorites(ids: string[]): void {
-  try {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(ids));
-  } catch {
-    // opslag niet beschikbaar: favoriet geldt alleen tot de pagina sluit
-  }
-}
 
 @Component({
   imports: [RouterLink],
@@ -37,6 +20,9 @@ export class RecipeDetail {
   protected readonly i18n = inject(I18nService);
   private readonly recipes = inject(RecipeService);
   private readonly timers = inject(TimerService);
+  private readonly favoritesService = inject(FavoritesService);
+  /** Ster en deelknop zijn alleen voor de ingelogde beheerder. */
+  protected readonly admin = inject(AuthService).admin;
 
   /** Komt uit de route (`recept/:id`). */
   readonly id = input.required<string>();
@@ -59,7 +45,6 @@ export class RecipeDetail {
   /** Aantal personen voor de slider (1-4); null als het recept er geen heeft: dan wordt niet geschaald. */
   protected readonly servings = signal<number | null>(null);
   protected readonly checked = signal<ReadonlySet<number>>(new Set());
-  protected readonly favorites = signal<string[]>(readFavorites());
   protected readonly toast = signal('');
   protected readonly fallbackText = signal('');
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -76,7 +61,7 @@ export class RecipeDetail {
 
   protected readonly isFavorite = computed(() => {
     const recipe = this.current();
-    return !!recipe && this.favorites().includes(recipe.id);
+    return !!recipe && this.favoritesService.ids().includes(recipe.id);
   });
 
   protected readonly servingsLabel = computed(() => {
@@ -111,21 +96,18 @@ export class RecipeDetail {
     });
   }
 
-  protected toggleFavorite(): void {
+  protected async toggleFavorite(): Promise<void> {
     const recipe = this.current();
     if (!recipe) {
       return;
     }
-    const on = !this.isFavorite();
-    const next = on ? [...this.favorites(), recipe.id] : this.favorites().filter((id) => id !== recipe.id);
-    this.favorites.set(next);
-    writeFavorites(next);
-    this.showToast(this.i18n.t(on ? 'favoriteAdded' : 'favoriteRemoved'));
+    const result = await this.favoritesService.toggle(recipe.id);
+    this.showToast(this.i18n.t(result === 'added' ? 'favoriteAdded' : result === 'removed' ? 'favoriteRemoved' : 'favoriteError'));
   }
 
   protected async share(): Promise<void> {
     const recipe = this.current();
-    if (!recipe) {
+    if (!recipe || !this.admin()) {
       return;
     }
     const text = buildShareText(
