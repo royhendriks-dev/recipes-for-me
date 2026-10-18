@@ -8,6 +8,11 @@ COPY angular.json tsconfig*.json ./
 COPY public ./public
 COPY src ./src
 RUN npm run build
+# version.json (naam, versie, commit) in hetzelfde formaat als /version.json van het portfolio; het portfolio leest
+# het via /apps/recipes/version.json. images.yml geeft de waarden mee; lokaal blijft het dev (public/version.json).
+ARG APP_VERSION=dev
+ARG APP_COMMIT=
+RUN printf '{"name":"recipes-for-me","version":"%s","commit":"%s"}\n' "$APP_VERSION" "$APP_COMMIT" > dist/recipes/browser/version.json
 
 FROM nginxinc/nginx-unprivileged:stable-alpine
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
