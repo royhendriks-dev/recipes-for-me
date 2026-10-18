@@ -9,6 +9,8 @@ export type TranslationKey =
   | 'favoriteSaved'
   | 'favoriteAdded'
   | 'favoriteRemoved'
+  | 'favoriteError'
+  | 'favorites'
   | 'servings'
   | 'person'
   | 'people'
@@ -70,6 +72,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     favoriteSaved: 'Opgeslagen als favoriet',
     favoriteAdded: 'Toegevoegd aan je favorieten',
     favoriteRemoved: 'Verwijderd uit je favorieten',
+    favoriteError: 'Favoriet opslaan is niet gelukt. Probeer het opnieuw.',
+    favorites: 'Favorieten',
     servings: 'Aantal personen',
     person: 'persoon',
     people: 'personen',
@@ -131,6 +135,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     favoriteSaved: 'Saved as favorite',
     favoriteAdded: 'Added to your favorites',
     favoriteRemoved: 'Removed from your favorites',
+    favoriteError: 'Saving the favorite failed. Please try again.',
+    favorites: 'Favorites',
     servings: 'Servings',
     person: 'person',
     people: 'people',
