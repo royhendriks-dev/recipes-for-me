@@ -2,22 +2,24 @@
 
 Een receptenwebsite die je op je telefoon prettig kunt gebruiken. Iedereen kan de gepubliceerde recepten bekijken; de eigenaar logt in om recepten te beheren en favorieten te markeren.
 
-> **Status:** begin van de app. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder. De backend-endpoints worden in `royhendriks-dev/portfolio` gebouwd; tot die er zijn geven de aanroepen een foutmelding in de app.
+> **Status:** de app draait als microservice (pod `recipes`, release 1.0.0) achter het portfolio op `/apps/recipes/`. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder; de backend-endpoints staan in `royhendriks-dev/portfolio`. Recepten beheren in de app zelf is er niet: de recepten komen als JSON-bestanden uit de portfolio-repo.
 
 ## Doel
 
 Een zelfstandige receptenapp, los van de portfolio-frontend, die de bestaande inlog, backend en database van het portfolio hergebruikt in plaats van een tweede stack op te zetten.
 
-Voorgestelde adres: `recipes.royhendriks.com`. Dit is een voorstel, geen bestaande configuratie.
+De app is bereikbaar via het portfolio op `/apps/recipes/` (iframe in het terminal-startvenster van de map Projecten). Een eigen subdomein `recipes.royhendriks.com` is alleen een voorstel, geen bestaande configuratie.
 
 ## Functies (eerste versie)
 
+Gebouwd:
+
 1. Recepten bekijken zonder in te loggen (titel, categorie, ingrediënten met hoeveelheden, bereiding, notities en metadata).
-2. Inloggen als eigenaar met het bestaande portfolio-account.
-3. Recepten aanmaken, bewerken, publiceren, depubliceren en verwijderen (alleen eigenaar, server-side afgedwongen).
-4. Favorieten met een ster, opgeslagen in de database per gebruiker, met een favorietenweergave.
-5. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord. Er is geen automatische koppeling met een boodschappenapp.
-6. Responsieve, mobile-first interface; PWA waar dat zinvol is.
+2. Favorieten met een ster, opgeslagen in de database bij het account van de beheerder, met een favorietenweergave (alleen zichtbaar voor de ingelogde beheerder).
+3. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord (alleen voor de beheerder). Er is geen automatische koppeling met een boodschappenapp.
+4. Keukentimers, personen-slider en een responsieve, mobile-first interface.
+
+Nog niet gebouwd: recepten aanmaken, bewerken, publiceren en verwijderen in de app (de recepten komen uit bestanden in de portfolio-repo), PWA, een eigen login in deze app.
 
 Bewust uitgesteld: recepten van meerdere gebruikers, beoordelingen, weekmenu's, boodschappenintegraties en een eigen backend.
 
@@ -28,32 +30,34 @@ Bewust uitgesteld: recepten van meerdere gebruikers, beoordelingen, weekmenu's, 
 | Frontend | deze repository | Angular, TypeScript, SCSS, nginx-container |
 | Backend, authenticatie, database | [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio) | Quarkus (Java), PostgreSQL, Flyway |
 
-- De receptenfrontend praat same-origin met de backend: nginx stuurt `/api/` door naar dezelfde backend als het portfolio. CORS of cookie-instellingen worden daarvoor niet versoepeld.
-- Inloggen gebeurt op de receptensite zelf tegen dezelfde gebruikerstabel. De sessie is per site; echte single sign-on tussen beide sites is niet mogelijk zonder het cookiemodel (`__Host-`, `SameSite=Strict`) te verzwakken.
-- Receptfunctionaliteit komt in de backend als apart package met eigen migraties, zodat het later te splitsen blijft.
+- De receptenfrontend praat same-origin met de backend: de browser laadt de app via het portfolio (`/apps/recipes/`) en roept `/api/` aan op dezelfde site, waar de nginx van het portfolio (niet de nginx in deze repo, die `/api/` niet doorstuurt) het naar de backend stuurt. CORS of cookie-instellingen worden daarvoor niet versoepeld. De pod `recipes` zelf praat niet met de backend (NetworkPolicies in de portfolio-repo).
+- Deze app heeft geen eigen login. Hij vraagt `GET /api/auth/session` en gebruikt de sessie van het portfolio; inloggen doe je daar. De nginx van het portfolio geeft de sessiecookie niet door aan de pod.
+- Receptfunctionaliteit staat in de backend als apart package met eigen migraties (`recipe`, `recipe_translation`, `recipe_favorite`), zodat het later te splitsen blijft.
 - Autorisatie gebeurt altijd op de server; de frontend toont of verbergt alleen.
 
 De volledige beoordeling van de portfolio-code staat in de projectnotities (`recipes-assessment/beoordeling-en-plan.md` in de projectbestanden).
 
 ## Gefaseerd plan
 
-| Fase | Inhoud | Repository |
-|---|---|---|
-| 0 | Keuzes vastleggen (favorieten alleen voor de eigenaar, afbeelding via URL, alleen Nederlands), README en `AGENTS.md` | recipes-for-me |
-| 1 | Migratie en package `recipe`: publiek lezen, beheer, publiceren | portfolio |
-| 2 | Favorieten-endpoints met tests | portfolio |
-| 3 | Angular-skelet: routing, inloggen, publieke lijst en detail | recipes-for-me |
-| 4 | Beheer-UI | recipes-for-me |
-| 5 | Favorietenster, favorietenweergave, ingrediënten delen | recipes-for-me |
-| 6 | PWA, laad-, leeg- en foutstaten, mobiele controle | recipes-for-me |
-| 7 | Infrastructuur en login-hardening voor livegang | portfolio |
+Oorspronkelijk plan; de stand per fase is gecontroleerd tegen de repo en de portfolio-changelog. De recepten staan inmiddels NL en EN in de backend en niet alleen Nederlands.
+
+| Fase | Inhoud | Repository | Stand |
+|---|---|---|---|
+| 0 | Keuzes vastleggen, README en `AGENTS.md` | recipes-for-me | gedaan |
+| 1 | Migratie en package `recipe`: publiek lezen (beheer en publiceren niet) | portfolio | lezen gedaan (V6, V7); beheer niet gebouwd |
+| 2 | Favorieten-endpoints met tests | portfolio | gedaan (V8) |
+| 3 | Angular-skelet: routing, publieke lijst en detail | recipes-for-me | gedaan; eigen login vervallen (sessie van het portfolio) |
+| 4 | Beheer-UI | recipes-for-me | niet gebouwd |
+| 5 | Favorietenster, favorietenweergave, ingrediënten delen | recipes-for-me | gedaan |
+| 6 | PWA, laad-, leeg- en foutstaten, mobiele controle | recipes-for-me | PWA niet gebouwd |
+| 7 | Infrastructuur en login-hardening voor livegang | portfolio | pod in `k8s/recipes.yaml`; login-hardening in de portfolio-repo |
 
 ## Werkwijze
 
 - Elke PR heeft een Jira-ticket in project PRW met het voorvoegsel `RCFM` in de titel (`RCFM - <naam van de PR>`).
 - Elk ticket wordt gedocumenteerd in Confluence (space PW) onder `Recipes-for-me` > `Tickets RCFM`.
 - Kwaliteitscontrole loopt via SonarQube Cloud; het `SONAR_TOKEN` is ingesteld voor het project (workflow `ci.yml`, configuratie in `sonar-project.properties`; organisatie en projectsleutel daarin zijn een aanname die nog tegen SonarQube Cloud gecontroleerd moet worden).
-- Wijzigingen gaan via een PR naar `main`. Regels voor mensen en agents staan in `AGENTS.md`.
+- Wijzigingen gaan via een PR naar `develop` of `main` (CI draait op beide); images en releases komen van `main`. Regels voor mensen en agents staan in `AGENTS.md`.
 
 ## Lokaal ontwikkelen
 
