@@ -23,6 +23,12 @@ npm run build       # productiebuild naar dist/recipes/browser
 - Nooit beweren dat een test slaagde zonder dat hij gedraaid is.
 - Kleine, gerichte wijzigingen; geen nieuwe frameworks of auth in deze repo.
 
+## Branches en mergen
+
+- Feature-PR's hebben base `develop`. De thread mag ze zelf mergen (squash) zodra CI en Sonar groen zijn.
+- `develop` -> `main` is een release-PR. Open of merge die niet op eigen initiatief; Roy doet dat zelf, net als tags en releases.
+- Spoedfix: branch `hotfix/<naam>` naar `main`, daarna `main` terug in `develop`.
+
 ## Checklist voor elke Pull Request
 
 1. Jira-ticket in project PRW met titel `RCFM - <naam>` en een Confluence-pagina onder `Recipes-for-me` > `Tickets RCFM` (space PW) met titel `<Jira-key> RCFM - <naam>`.
