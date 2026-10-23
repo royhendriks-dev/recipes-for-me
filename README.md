@@ -57,7 +57,7 @@ Oorspronkelijk plan; de stand per fase is gecontroleerd tegen de repo en de port
 - Elke PR heeft een Jira-ticket in project PRW met het voorvoegsel `RCFM` in de titel (`RCFM - <naam van de PR>`).
 - Elk ticket wordt gedocumenteerd in Confluence (space PW) onder `Recipes-for-me` > `Tickets RCFM`.
 - Kwaliteitscontrole loopt via SonarQube Cloud; het `SONAR_TOKEN` is ingesteld voor het project (workflow `ci.yml`, configuratie in `sonar-project.properties`; organisatie en projectsleutel daarin zijn een aanname die nog tegen SonarQube Cloud gecontroleerd moet worden).
-- Wijzigingen gaan via een PR naar `develop` of `main` (CI draait op beide); images en releases komen van `main`. Regels voor mensen en agents staan in `AGENTS.md`.
+- Releaseflow: feature-PR's gaan naar `develop` (CI en Sonar draaien; er wordt geen image gepusht en niets gereleased). Een PR `develop` -> `main` is een nieuwe release; die doet Roy zelf. Daarna start Roy de workflow Release (zie hieronder) op `main`. Dependabot maakt zijn PR's naar `develop` (`.github/dependabot.yml`). Regels voor mensen en agents staan in `AGENTS.md`.
 
 ## Lokaal ontwikkelen
 
@@ -110,8 +110,8 @@ De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.ser
 ## Container en images
 
 - `Dockerfile`: bouwt de app en serveert de statische bestanden met `nginxinc/nginx-unprivileged` op poort 8080 (config in `docker/nginx.conf`, CSP met `frame-ancestors 'self'`). Alleen de nginx-laag is architectuurafhankelijk; de build is voor amd64 en arm64 gelijk.
-- `.github/workflows/images.yml` bouwt `linux/amd64` en `linux/arm64` en pusht naar `ghcr.io/royhendriks-dev/recipes-for-me` bij een push naar `main` (tags `sha-<korte-sha>` en `latest`) en bij een `v*`-tag (semver). Op een PR wordt alleen gebouwd, niet gepusht.
+- `.github/workflows/images.yml` bouwt `linux/amd64` en `linux/arm64` en pusht naar `ghcr.io/royhendriks-dev/recipes-for-me` bij een push naar `main`, dus bij het mergen van een release-PR (tags `sha-<korte-sha>` en `latest`); een push naar `develop` bouwt geen image en bij een `v*`-tag (semver). Op een PR (ook naar `develop`) wordt alleen gebouwd, niet gepusht.
 - Versie: `public/version.json` (`{name, version, commit}`, lokaal `dev`) wordt als statisch bestand meegeleverd; het Dockerfile overschrijft het met de build-args `APP_VERSION` en `APP_COMMIT`, die `images.yml` vult (tag `v1.2.3` geeft `1.2.3`, anders `dev`; commit = volledige sha). Het portfolio leest het via `/apps/recipes/version.json` in Start > Systeemeigenschappen (blok "Versies recepten").
 - Release: `.github/workflows/release.yml` start je handmatig (Actions > Release > Run workflow, branch `main`) met een versie `x.y.z`. Hij controleert dat CI voor die commit groen is en dat de tag nog niet bestaat, maakt de tag `vx.y.z` met een GitHub Release (automatische notes) en start `images.yml` op die tag, zodat image `x.y.z` op GHCR komt. De release-workflow moet zelf `images.yml` starten, omdat tags die met `GITHUB_TOKEN` gemaakt worden geen andere workflows triggeren.
-- `.github/workflows/ci.yml`: tests met coverage (drempel 80% voor statements, branches, functions en lines, ingesteld in `angular.json`), build en SonarQube Cloud (`sonar-project.properties`); de job wacht op de Sonar-quality gate en faalt als die niet slaagt.
+- `.github/workflows/ci.yml` (draait op pushes naar `main` en `develop` en op elke PR): tests met coverage (drempel 80% voor statements, branches, functions en lines, ingesteld in `angular.json`), build en SonarQube Cloud (`sonar-project.properties`); de job wacht op de Sonar-quality gate en faalt als die niet slaagt.
 - Let op: de Docker-build is lokaal niet uitgeprobeerd (geen Docker-daemon beschikbaar); de eerste echte run is die van de workflow.
