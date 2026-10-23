@@ -25,7 +25,7 @@ jobs:
       - name: SonarQube Cloud
         # Secrets zijn niet beschikbaar voor PR's vanaf forks (bijv. Dependabot); sla de scan dan over.
         if: env.SONAR_TOKEN != ''
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v8
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
