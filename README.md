@@ -73,7 +73,7 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 ## Wat er nu in zit
 
 - Receptenlijst (`#/`) en receptpagina (`#/recept/<id>`); routes zijn hash-routes zodat de app onder elk subpad werkt zonder serverconfiguratie.
-- Receptpagina: personen-slider 1-4 die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten en timers voor iedereen. Alleen voor de ingelogde beheerder (zie *Favorieten en delen alleen voor de beheerder*): de ster als favoriet en de deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
+- Receptpagina: personen-slider (2 of 4) die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten en timers voor iedereen. Alleen voor de ingelogde beheerder (zie *Favorieten en delen alleen voor de beheerder*): de ster als favoriet en de deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
 - Favorieten: bij de beheerder staat in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers). Bezoekers zien dat blok, de sterren, de ster-knop en de deelknop niet; de recepten, timers en het afvinken werken voor hen gewoon.
 - Nederlandse en Engelse interface. In het portfolio (iframe) volgt de app de taal van de NL/EN-knop in de titelbalk: dezelfde `localStorage`-sleutel `lang` (zelfde origin), met een `storage`-event bij wisselen; de app heeft daar geen eigen taalknop. Los draaiend (buiten een iframe) staat er wel een taalknop. Receptinhoud komt per taal uit de backend.
 - Receptenlijst: gegroepeerd onder kopjes Hoofdgerecht, Bijgerecht en Zoet (met aantal), een filter per soort, en per recept een categorie-icoon (er zijn nog geen afbeeldingen in de data).
@@ -90,7 +90,7 @@ Het backend-contract staat in de portfolio-repo (`backend/README.md`, portfolio 
 | `GET /api/recipes/{id}?lang=nl\|en` | dezelfde velden plus `ingredients: [{ amount, unit, name, group, optional }]`, `steps: [{ text, group }]` en `notes: [tekst]` |
 
 - Onbekende taal valt terug op NL; onbekend id geeft 404 `{"error":"not_found"}` (de app toont "Dit recept bestaat niet"); zonder database 503 (de app toont een foutmelding met "opnieuw proberen").
-- `minutes` en `servings` kunnen leeg zijn. `amount` geldt voor `servings` personen en kan leeg zijn; dan staat de hele regel in `name`. Een recept zonder `servings` krijgt geen personen-slider en wordt niet geschaald; een leeg `amount` toont geen getal. Het aantal personen in de slider loopt van 1 tot 4.
+- `minutes` en `servings` kunnen leeg zijn. `amount` geldt voor `servings` personen en kan leeg zijn; dan staat de hele regel in `name`. Een recept zonder `servings` krijgt geen personen-slider en wordt niet geschaald; een leeg `amount` toont geen getal. De slider kent alleen 2 en 4 personen (stap 2); een recept met 3 of meer personen begint op 4, anders op 2.
 - `steps[].timerMinutes` is een voorstel van de frontend en bestaat nog niet in de backend; het veld is optioneel en de timerknop verschijnt alleen als het er is. Eigen timers werken los daarvan.
 - Beschrijving, moeilijkheid en afbeelding bestaan niet in dit contract en worden niet getoond.
 

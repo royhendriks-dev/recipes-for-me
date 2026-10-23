@@ -35,6 +35,8 @@ describe('RecipeDetail', () => {
     await fixture.whenStable();
     expect(el.querySelector('.qty')?.textContent).toBe('120 g');
     expect(el.querySelector('output')?.textContent).toBe('2 personen');
+    expect(slider.min).toBe('2');
+    expect(slider.step).toBe('2');
   });
 
   it('vinkt ingrediënten af en telt ze', async () => {
