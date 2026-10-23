@@ -26,6 +26,7 @@ npm run build       # productiebuild naar dist/recipes/browser
 ## Branches en mergen
 
 - Feature-PR's hebben base `develop`. De thread mag ze zelf mergen (squash) zodra CI en Sonar groen zijn.
+- CI wacht op de Sonar-gate bij PR's en `main`, niet bij een push naar `develop` (SonarQube Cloud geeft daar de gate niet vrij); een rode push-run op `develop` door "non main branches" is dus een configuratiefout, geen codefout.
 - `develop` -> `main` is een release-PR. Open of merge die niet op eigen initiatief; Roy doet dat zelf, net als tags en releases.
 - Spoedfix: branch `hotfix/<naam>` naar `main`, daarna `main` terug in `develop`.
 

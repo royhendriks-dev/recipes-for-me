@@ -2,22 +2,24 @@
 
 Een receptenwebsite die je op je telefoon prettig kunt gebruiken. Iedereen kan de gepubliceerde recepten bekijken; de eigenaar logt in om recepten te beheren en favorieten te markeren.
 
-> **Status:** begin van de app. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder. De backend-endpoints worden in `royhendriks-dev/portfolio` gebouwd; tot die er zijn geven de aanroepen een foutmelding in de app.
+> **Status:** de app draait als microservice (pod `recipes`, release 1.0.0) achter het portfolio op `/apps/recipes/`. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder; de backend-endpoints staan in `royhendriks-dev/portfolio`. Recepten beheren in de app zelf is er niet: de recepten komen als JSON-bestanden uit de portfolio-repo.
 
 ## Doel
 
 Een zelfstandige receptenapp, los van de portfolio-frontend, die de bestaande inlog, backend en database van het portfolio hergebruikt in plaats van een tweede stack op te zetten.
 
-Voorgestelde adres: `recipes.royhendriks.com`. Dit is een voorstel, geen bestaande configuratie.
+De app is bereikbaar via het portfolio op `/apps/recipes/` (iframe in het terminal-startvenster van de map Projecten). Een eigen subdomein `recipes.royhendriks.com` is alleen een voorstel, geen bestaande configuratie.
 
 ## Functies (eerste versie)
 
+Gebouwd:
+
 1. Recepten bekijken zonder in te loggen (titel, categorie, ingrediënten met hoeveelheden, bereiding, notities en metadata).
-2. Inloggen als eigenaar met het bestaande portfolio-account.
-3. Recepten aanmaken, bewerken, publiceren, depubliceren en verwijderen (alleen eigenaar, server-side afgedwongen).
-4. Favorieten met een ster, opgeslagen in de database per gebruiker, met een favorietenweergave.
-5. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord. Er is geen automatische koppeling met een boodschappenapp.
-6. Responsieve, mobile-first interface; PWA waar dat zinvol is.
+2. Favorieten met een ster, opgeslagen in de database bij het account van de beheerder, met een favorietenweergave (alleen zichtbaar voor de ingelogde beheerder).
+3. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord (alleen voor de beheerder). Er is geen automatische koppeling met een boodschappenapp.
+4. Keukentimers, personen-slider en een responsieve, mobile-first interface.
+
+Nog niet gebouwd: recepten aanmaken, bewerken, publiceren en verwijderen in de app (de recepten komen uit bestanden in de portfolio-repo), PWA, een eigen login in deze app.
 
 Bewust uitgesteld: recepten van meerdere gebruikers, beoordelingen, weekmenu's, boodschappenintegraties en een eigen backend.
 
@@ -28,25 +30,27 @@ Bewust uitgesteld: recepten van meerdere gebruikers, beoordelingen, weekmenu's, 
 | Frontend | deze repository | Angular, TypeScript, SCSS, nginx-container |
 | Backend, authenticatie, database | [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio) | Quarkus (Java), PostgreSQL, Flyway |
 
-- De receptenfrontend praat same-origin met de backend: nginx stuurt `/api/` door naar dezelfde backend als het portfolio. CORS of cookie-instellingen worden daarvoor niet versoepeld.
-- Inloggen gebeurt op de receptensite zelf tegen dezelfde gebruikerstabel. De sessie is per site; echte single sign-on tussen beide sites is niet mogelijk zonder het cookiemodel (`__Host-`, `SameSite=Strict`) te verzwakken.
-- Receptfunctionaliteit komt in de backend als apart package met eigen migraties, zodat het later te splitsen blijft.
+- De receptenfrontend praat same-origin met de backend: de browser laadt de app via het portfolio (`/apps/recipes/`) en roept `/api/` aan op dezelfde site, waar de nginx van het portfolio (niet de nginx in deze repo, die `/api/` niet doorstuurt) het naar de backend stuurt. CORS of cookie-instellingen worden daarvoor niet versoepeld. De pod `recipes` zelf praat niet met de backend (NetworkPolicies in de portfolio-repo).
+- Deze app heeft geen eigen login. Hij vraagt `GET /api/auth/session` en gebruikt de sessie van het portfolio; inloggen doe je daar. De nginx van het portfolio geeft de sessiecookie niet door aan de pod.
+- Receptfunctionaliteit staat in de backend als apart package met eigen migraties (`recipe`, `recipe_translation`, `recipe_favorite`), zodat het later te splitsen blijft.
 - Autorisatie gebeurt altijd op de server; de frontend toont of verbergt alleen.
 
 De volledige beoordeling van de portfolio-code staat in de projectnotities (`recipes-assessment/beoordeling-en-plan.md` in de projectbestanden).
 
 ## Gefaseerd plan
 
-| Fase | Inhoud | Repository |
-|---|---|---|
-| 0 | Keuzes vastleggen (favorieten alleen voor de eigenaar, afbeelding via URL, alleen Nederlands), README en `AGENTS.md` | recipes-for-me |
-| 1 | Migratie en package `recipe`: publiek lezen, beheer, publiceren | portfolio |
-| 2 | Favorieten-endpoints met tests | portfolio |
-| 3 | Angular-skelet: routing, inloggen, publieke lijst en detail | recipes-for-me |
-| 4 | Beheer-UI | recipes-for-me |
-| 5 | Favorietenster, favorietenweergave, ingrediënten delen | recipes-for-me |
-| 6 | PWA, laad-, leeg- en foutstaten, mobiele controle | recipes-for-me |
-| 7 | Infrastructuur en login-hardening voor livegang | portfolio |
+Oorspronkelijk plan; de stand per fase is gecontroleerd tegen de repo en de portfolio-changelog. De recepten staan inmiddels NL en EN in de backend en niet alleen Nederlands.
+
+| Fase | Inhoud | Repository | Stand |
+|---|---|---|---|
+| 0 | Keuzes vastleggen, README en `AGENTS.md` | recipes-for-me | gedaan |
+| 1 | Migratie en package `recipe`: publiek lezen (beheer en publiceren niet) | portfolio | lezen gedaan (V6, V7); beheer niet gebouwd |
+| 2 | Favorieten-endpoints met tests | portfolio | gedaan (V8) |
+| 3 | Angular-skelet: routing, publieke lijst en detail | recipes-for-me | gedaan; eigen login vervallen (sessie van het portfolio) |
+| 4 | Beheer-UI | recipes-for-me | niet gebouwd |
+| 5 | Favorietenster, favorietenweergave, ingrediënten delen | recipes-for-me | gedaan |
+| 6 | PWA, laad-, leeg- en foutstaten, mobiele controle | recipes-for-me | PWA niet gebouwd |
+| 7 | Infrastructuur en login-hardening voor livegang | portfolio | pod in `k8s/recipes.yaml`; login-hardening in de portfolio-repo |
 
 ## Werkwijze
 
@@ -73,7 +77,7 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 ## Wat er nu in zit
 
 - Receptenlijst (`#/`) en receptpagina (`#/recept/<id>`); routes zijn hash-routes zodat de app onder elk subpad werkt zonder serverconfiguratie.
-- Receptpagina: personen-slider 1-4 die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten en timers voor iedereen. Alleen voor de ingelogde beheerder (zie *Favorieten en delen alleen voor de beheerder*): de ster als favoriet en de deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
+- Receptpagina: personen-slider (2 of 4) die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten en timers voor iedereen. Alleen voor de ingelogde beheerder (zie *Favorieten en delen alleen voor de beheerder*): de ster als favoriet en de deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
 - Favorieten: bij de beheerder staat in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers). Bezoekers zien dat blok, de sterren, de ster-knop en de deelknop niet; de recepten, timers en het afvinken werken voor hen gewoon.
 - Nederlandse en Engelse interface. In het portfolio (iframe) volgt de app de taal van de NL/EN-knop in de titelbalk: dezelfde `localStorage`-sleutel `lang` (zelfde origin), met een `storage`-event bij wisselen; de app heeft daar geen eigen taalknop. Los draaiend (buiten een iframe) staat er wel een taalknop. Receptinhoud komt per taal uit de backend.
 - Receptenlijst: gegroepeerd onder kopjes Hoofdgerecht, Bijgerecht en Zoet (met aantal), een filter per soort, en per recept een categorie-icoon (er zijn nog geen afbeeldingen in de data).
@@ -90,7 +94,7 @@ Het backend-contract staat in de portfolio-repo (`backend/README.md`, portfolio 
 | `GET /api/recipes/{id}?lang=nl\|en` | dezelfde velden plus `ingredients: [{ amount, unit, name, group, optional }]`, `steps: [{ text, group }]` en `notes: [tekst]` |
 
 - Onbekende taal valt terug op NL; onbekend id geeft 404 `{"error":"not_found"}` (de app toont "Dit recept bestaat niet"); zonder database 503 (de app toont een foutmelding met "opnieuw proberen").
-- `minutes` en `servings` kunnen leeg zijn. `amount` geldt voor `servings` personen en kan leeg zijn; dan staat de hele regel in `name`. Een recept zonder `servings` krijgt geen personen-slider en wordt niet geschaald; een leeg `amount` toont geen getal. Het aantal personen in de slider loopt van 1 tot 4.
+- `minutes` en `servings` kunnen leeg zijn. `amount` geldt voor `servings` personen en kan leeg zijn; dan staat de hele regel in `name`. Een recept zonder `servings` krijgt geen personen-slider en wordt niet geschaald; een leeg `amount` toont geen getal. De slider kent alleen 2 en 4 personen (stap 2); een recept met 3 of meer personen begint op 4, anders op 2.
 - `steps[].timerMinutes` is een voorstel van de frontend en bestaat nog niet in de backend; het veld is optioneel en de timerknop verschijnt alleen als het er is. Eigen timers werken los daarvan.
 - Beschrijving, moeilijkheid en afbeelding bestaan niet in dit contract en worden niet getoond.
 
@@ -109,5 +113,5 @@ De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.ser
 - `.github/workflows/images.yml` bouwt `linux/amd64` en `linux/arm64` en pusht naar `ghcr.io/royhendriks-dev/recipes-for-me` bij een push naar `main`, dus bij het mergen van een release-PR (tags `sha-<korte-sha>` en `latest`); een push naar `develop` bouwt geen image en bij een `v*`-tag (semver). Op een PR (ook naar `develop`) wordt alleen gebouwd, niet gepusht.
 - Versie: `public/version.json` (`{name, version, commit}`, lokaal `dev`) wordt als statisch bestand meegeleverd; het Dockerfile overschrijft het met de build-args `APP_VERSION` en `APP_COMMIT`, die `images.yml` vult (tag `v1.2.3` geeft `1.2.3`, anders `dev`; commit = volledige sha). Het portfolio leest het via `/apps/recipes/version.json` in Start > Systeemeigenschappen (blok "Versies recepten").
 - Release: `.github/workflows/release.yml` start je handmatig (Actions > Release > Run workflow, branch `main`) met een versie `x.y.z`. Hij controleert dat CI voor die commit groen is en dat de tag nog niet bestaat, maakt de tag `vx.y.z` met een GitHub Release (automatische notes) en start `images.yml` op die tag, zodat image `x.y.z` op GHCR komt. De release-workflow moet zelf `images.yml` starten, omdat tags die met `GITHUB_TOKEN` gemaakt worden geen andere workflows triggeren.
-- `.github/workflows/ci.yml` (draait op pushes naar `main` en `develop` en op elke PR): tests met coverage (drempel 80% voor statements, branches, functions en lines, ingesteld in `angular.json`), build en SonarQube Cloud (`sonar-project.properties`); de job wacht op de Sonar-quality gate en faalt als die niet slaagt.
+- `.github/workflows/ci.yml` (draait op pushes naar `main` en `develop` en op elke PR): tests met coverage (drempel 80% voor statements, branches, functions en lines, ingesteld in `angular.json`), build en SonarQube Cloud (`sonar-project.properties`); de job wacht op de Sonar-quality gate en faalt als die niet slaagt, behalve bij een push naar `develop`: daar geeft het gratis SonarQube-plan de gate van een niet-main-branch niet vrij ("Organization is not allowed to access data from non main branches"), dus daar loopt de scan wel maar wacht de job niet op de gate (PR's en `main` wel).
 - Let op: de Docker-build is lokaal niet uitgeprobeerd (geen Docker-daemon beschikbaar); de eerste echte run is die van de workflow.
