@@ -42,7 +42,7 @@ export class RecipeDetail {
     return failure instanceof HttpErrorResponse && failure.status === 404;
   });
 
-  /** Aantal personen voor de slider (1-4); null als het recept er geen heeft: dan wordt niet geschaald. */
+  /** Aantal personen voor de slider (2 of 4); null als het recept er geen heeft: dan wordt niet geschaald. */
   protected readonly servings = signal<number | null>(null);
   protected readonly checked = signal<ReadonlySet<number>>(new Set());
   protected readonly toast = signal('');
@@ -50,11 +50,11 @@ export class RecipeDetail {
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
-    // Begin bij het aantal personen van het recept (de slider gaat van 1 tot 4).
+    // Begin bij het aantal personen van het recept (de slider kent alleen 2 en 4).
     effect(() => {
       const recipe = this.current();
       if (recipe) {
-        untracked(() => this.servings.set(recipe.servings === null ? null : Math.min(4, Math.max(1, recipe.servings))));
+        untracked(() => this.servings.set(recipe.servings === null ? null : recipe.servings >= 3 ? 4 : 2));
       }
     });
   }
