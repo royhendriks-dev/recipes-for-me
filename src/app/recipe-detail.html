@@ -77,7 +77,6 @@
           }
         </ul>
       }
-      @if (admin()) {
       <div class="share">
         <button class="btn" type="button" (click)="share()">{{ i18n.t('share') }}</button>
         <p class="hint">{{ i18n.t('shareHint') }}</p>
@@ -86,6 +85,19 @@
           <textarea class="fallback" readonly [value]="fallbackText()" [attr.aria-label]="i18n.t('ingredientsAsText')"></textarea>
         }
       </div>
+      @if (discord.enabled()) {
+        <div class="share discord">
+          <h3 class="group">{{ i18n.t('discordHeading') }}</h3>
+          @if (discord.connected()) {
+            <button class="btn" type="button" (click)="sendToDiscord()">{{ i18n.t('discordSend') }}</button>
+            <button class="btn alt" type="button" (click)="disconnectDiscord()">{{ i18n.t('discordDisconnect') }}</button>
+          } @else {
+            <a class="btn" [href]="discord.connectUrl" target="_blank" rel="noopener">
+              {{ i18n.t('discordConnect') }}<span class="visually-hidden"> ({{ i18n.t('discordNewTab') }})</span>
+            </a>
+          }
+          <p class="hint">{{ i18n.t('discordHint') }}</p>
+        </div>
       }
     </details>
 

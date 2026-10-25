@@ -22,6 +22,7 @@ npm run build       # productiebuild naar dist/recipes/browser
 - Geen secrets in de repo. `SONAR_TOKEN` staat als GitHub-secret.
 - Nooit beweren dat een test slaagde zonder dat hij gedraaid is.
 - Kleine, gerichte wijzigingen; geen nieuwe frameworks of auth in deze repo.
+- Discord (`src/app/discord.service.ts`): de app bewaart nooit een webhook of token en stuurt alleen `{recipe, lang, servings}` naar `/api/discord/share`; de webhook, het client secret en de limieten horen in de backend (zie README, *Naar je eigen Discord-server*). Koppelen opent altijd in een nieuw tabblad.
 
 ## Branches en mergen
 
