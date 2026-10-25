@@ -15,7 +15,7 @@ export interface Ingredient {
 export interface RecipeStep {
   text: string;
   group: string | null;
-  /** Voorstel, nog niet in de backend: bij deze stap hoort een timer van zoveel minuten. */
+  /** Optioneel (backend: heel getal 1-1440): bij deze stap hoort een timer van zoveel minuten. */
   timerMinutes?: number;
 }
 
