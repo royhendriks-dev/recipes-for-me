@@ -2,7 +2,7 @@
 
 Een receptenwebsite die je op je telefoon prettig kunt gebruiken. Iedereen kan de gepubliceerde recepten bekijken; iedereen kan favorieten markeren (bezoekers in de eigen browser, de eigenaar in de database).
 
-> **Status:** de app draait als microservice (pod `recipes`, release 1.0.0) achter het portfolio op `/apps/recipes/`. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder; de backend-endpoints staan in `royhendriks-dev/portfolio`. Recepten beheren in de app zelf is er niet: de recepten komen als JSON-bestanden uit de portfolio-repo.
+> **Status:** de app draait als microservice (pod `recipes`; laatste release 1.1.0, tag `v1.1.0`; welke versie op de M1 draait staat in `k8s/recipes.yaml` van de portfolio-repo) achter het portfolio op `/apps/recipes/`. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder; de backend-endpoints staan in `royhendriks-dev/portfolio`. Recepten beheren in de app zelf is er niet: de recepten komen als JSON-bestanden uit de portfolio-repo.
 
 ## Doel
 
@@ -57,7 +57,7 @@ Oorspronkelijk plan; de stand per fase is gecontroleerd tegen de repo en de port
 
 - Elke PR heeft een Jira-ticket in project PRW met het voorvoegsel `RCFM` in de titel (`RCFM - <naam van de PR>`).
 - Elk ticket wordt gedocumenteerd in Confluence (space PW) onder `Recipes-for-me` > `Tickets RCFM`.
-- Kwaliteitscontrole loopt via SonarQube Cloud; het `SONAR_TOKEN` is ingesteld voor het project (workflow `ci.yml`, configuratie in `sonar-project.properties`; organisatie en projectsleutel daarin zijn een aanname die nog tegen SonarQube Cloud gecontroleerd moet worden).
+- Kwaliteitscontrole loopt via SonarQube Cloud; het `SONAR_TOKEN` is ingesteld voor het project (workflow `ci.yml`, configuratie in `sonar-project.properties`; de projectsleutel `royhendriks-dev_recipes-for-me` is gecontroleerd tegen de check `SonarCloud Code Analysis` op een PR).
 - Releaseflow: feature-PR's gaan naar `develop` (CI en Sonar draaien; er wordt geen image gepusht en niets gereleased). Een PR `develop` -> `main` is een nieuwe release; die doet Roy zelf. Daarna start Roy de workflow Release (zie hieronder) op `main`. Dependabot maakt zijn PR's naar `develop` (`.github/dependabot.yml`). Regels voor mensen en agents staan in `AGENTS.md`.
 
 ## Lokaal ontwikkelen
@@ -71,7 +71,7 @@ npm run test:ci     # unit-tests (Vitest) met coverage
 npm run build       # productiebuild in dist/recipes/browser
 ```
 
-De dev-server draait bewust op poort 4300 (niet de standaard 4200, die is van de portfolio-frontend) en met `servePath` `/apps/recipes/`. Zo kan de dev-server van het portfolio (`npm start` in `portfolio/frontend`, http://localhost:4200) `/apps/recipes/` naar deze app doorsturen en laadt het Recepten-venster daar de echte app. Start eerst deze app en open dan http://localhost:4200 (portfolio); losse app: http://localhost:4300/apps/recipes/. Zonder draaiende recepten-dev-server toont het portfolio een 503-pagina in dat venster.
+De dev-server draait bewust op poort 4300 (niet de standaard 4200, die is van de portfolio-frontend) en met `servePath` `/apps/recipes/`. Zo kan de dev-server van het portfolio (`npm start` in `portfolio/frontend`, http://localhost:4200) `/apps/recipes/` naar deze app doorsturen en laadt het Recepten-venster daar de echte app. Start eerst deze app en open dan http://localhost:4200 (portfolio); losse app: http://localhost:4300/apps/recipes/. Zonder draaiende recepten-dev-server toont het portfolio een 503-pagina in dat venster. Geeft het portfolio een 503 terwijl de app wel draait (vooral op Windows: `localhost` is daar IPv6, de proxy van het portfolio gebruikt `127.0.0.1:4300`), start de app dan met `npm start -- --host 127.0.0.1`.
 
 De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een subpad zoals `/apps/recipes/`.
 
@@ -79,7 +79,6 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 
 - Receptenlijst (`#/`) en receptpagina (`#/recept/<id>`); routes zijn hash-routes zodat de app onder elk subpad werkt zonder serverconfiguratie.
 - Receptpagina: personen-slider (2 of 4) die hoeveelheden schaalt en bovenin het inklapbare ingrediëntenblok staat (inklappen verbergt dus ook de slider), inklapbare afvinkbare ingrediënten en timers voor iedereen. De deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren) en de Discord-knoppen zijn er voor iedereen. De ster als favoriet is er ook voor iedereen (zie *Favorieten*).
-- Favorieten: bij de beheerder staat in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers). Bezoekers zien dat blok, de sterren en de ster-knop niet; de recepten, timers, afvinken en delen werken voor hen gewoon.
 - Favorieten: iedereen ziet in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers), zodra er een favoriet is. Bezoekers zien alleen hun eigen favorieten.
 - Nederlandse en Engelse interface. In het portfolio (iframe) volgt de app de taal van de NL/EN-knop in de titelbalk: dezelfde `localStorage`-sleutel `lang` (zelfde origin), met een `storage`-event bij wisselen; de app heeft daar geen eigen taalknop. Los draaiend (buiten een iframe) staat er wel een taalknop. Receptinhoud komt per taal uit de backend.
 - Receptenlijst: gegroepeerd onder kopjes Hoofdgerecht, Bijgerecht en Zoet (met aantal), een filter per soort, en per recept een categorie-icoon (er zijn nog geen afbeeldingen in de data).
@@ -88,7 +87,7 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 
 ## API-contract
 
-Het backend-contract staat in de portfolio-repo (`backend/README.md`, portfolio PR #82 op het moment van schrijven; die file is bij het bijwerken van deze README niet zelf gelezen, de velden hieronder komen uit de beschrijving van de backend-thread). Alleen lezen en openbaar. De frontend roept relatieve paden op dezelfde origin aan (`/api/...`, niet relatief aan `/apps/recipes/`):
+Het backend-contract staat in de portfolio-repo (`backend/README.md`, sectie *Recepten*; de velden hieronder zijn gecontroleerd tegen de records `RecipeSummary` en `Recipe` in de backend). Alleen lezen en openbaar. De frontend roept relatieve paden op dezelfde origin aan (`/api/...`, niet relatief aan `/apps/recipes/`):
 
 | Aanroep | Antwoord |
 |---|---|
@@ -97,7 +96,7 @@ Het backend-contract staat in de portfolio-repo (`backend/README.md`, portfolio 
 
 - Onbekende taal valt terug op NL; onbekend id geeft 404 `{"error":"not_found"}` (de app toont "Dit recept bestaat niet"); zonder database 503 (de app toont een foutmelding met "opnieuw proberen").
 - `minutes` en `servings` kunnen leeg zijn. `amount` geldt voor `servings` personen en kan leeg zijn; dan staat de hele regel in `name`. Een recept zonder `servings` krijgt geen personen-slider en wordt niet geschaald; een leeg `amount` toont geen getal. De slider kent alleen 2 en 4 personen (stap 2); een recept met 3 of meer personen begint op 4, anders op 2.
-- `steps[].timerMinutes` is een voorstel van de frontend en bestaat nog niet in de backend; het veld is optioneel en de timerknop verschijnt alleen als het er is. Eigen timers werken los daarvan.
+- `steps[].timerMinutes` (heel getal 1 tot 1440) is optioneel en wordt door de backend ondersteund en ongewijzigd doorgegeven, maar geen enkel recept gebruikt het nu; de timerknop verschijnt alleen als het veld er is. Eigen timers werken los daarvan.
 - Beschrijving, moeilijkheid en afbeelding bestaan niet in dit contract en worden niet getoond.
 
 De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.service.ts`. Testdata in dit formaat staat in `src/testing/fixtures.ts`.
@@ -109,7 +108,7 @@ De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.ser
 
 ## Beheerder: login en favorieten in de backend
 
-- De app heeft geen eigen login. Hij vraagt bij het starten `GET /api/auth/session` (zelfde origin, dus het sessiecookie van het portfolio gaat mee): 200 met `{ username, roles, csrfToken }` en de rol `admin` betekent beheerder, 204 of een fout betekent bezoeker (`src/app/auth.service.ts`). Inloggen doe je in het portfolio (Start, Inloggen); na inloggen laad je de recepten-app opnieuw om de ster te zien.
+- De app heeft geen eigen login. Hij vraagt bij het starten `GET /api/auth/session` (zelfde origin, dus het sessiecookie van het portfolio gaat mee): 200 met `{ username, roles, csrfToken }` en de rol `admin` betekent beheerder, 204 of een fout betekent bezoeker (`src/app/auth.service.ts`). Inloggen doe je in het portfolio (Start, Inloggen); na inloggen laad je de recepten-app opnieuw, dan gebruikt hij de favorieten uit de database in plaats van die uit de browser.
 - Favorieten staan in de backend (portfolio-repo, tabel `recipe_favorite`, migratie V8) en niet meer in `localStorage`: `GET /api/recipes/favorites` (lijst van slugs), `PUT` en `DELETE /api/recipes/favorites/{id}` met de header `X-CSRF-Token` uit de sessie (`src/app/favorites.service.ts`). Zonder login geven die endpoints 401, zonder CSRF-token 403, bij een onbekend recept 404. Mislukt opslaan, dan draait de app de ster terug en toont een melding.
 - De beveiliging zit in de backend (`@RolesAllowed("admin")`); de app vraagt alleen een favorietenlijst bij de backend als je beheerder bent.
 - Eerdere favorieten uit `localStorage` van de beheerder werden niet overgenomen in de backend; dezelfde sleutel `recipes.favorites` wordt nu door bezoekers gebruikt.

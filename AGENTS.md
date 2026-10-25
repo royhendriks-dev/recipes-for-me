@@ -4,7 +4,7 @@ Instructies voor mensen en AI-agents die in deze repository werken. Eigenaar: Ro
 
 ## Wat is dit
 
-Losse Angular-frontend (standalone components, signals, SCSS, Vitest) voor recepten. Backend, authenticatie en database staan in [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio); wijzigingen daaraan horen daar, niet hier. De app draait als statische site (nginx) en wordt later in een iframe op `/apps/recipes/` in het portfolio geladen (zelfde origin). Daarom gebruikt `src/index.html` een relatieve `<base href="./">`; gebruik nooit absolute paden naar assets.
+Losse Angular-frontend (standalone components, signals, SCSS, Vitest) voor recepten. Backend, authenticatie en database staan in [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio); wijzigingen daaraan horen daar, niet hier. De app draait als statische site (nginx) en wordt in een iframe op `/apps/recipes/` in het portfolio geladen (zelfde origin). Daarom gebruikt `src/index.html` een relatieve `<base href="./">`; gebruik nooit absolute paden naar assets.
 
 ## Commando's
 
