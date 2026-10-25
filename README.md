@@ -16,7 +16,7 @@ Gebouwd:
 
 1. Recepten bekijken zonder in te loggen (titel, categorie, ingrediënten met hoeveelheden, bereiding, notities en metadata).
 2. Favorieten met een ster, opgeslagen in de database bij het account van de beheerder, met een favorietenweergave (alleen zichtbaar voor de ingelogde beheerder).
-3. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord (alleen voor de beheerder). Er is geen automatische koppeling met een boodschappenapp.
+3. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord (voor iedereen). Er is geen automatische koppeling met een boodschappenapp. Daarnaast kan elke bezoeker, zonder inlog, een recept naar zijn eigen Discord-server sturen (zie *Naar je eigen Discord-server*).
 4. Keukentimers, personen-slider en een responsieve, mobile-first interface.
 5. Volledig-scherm-knop in de kopbalk (Fullscreen API, `src/app/fullscreen.service.ts`). De knop verschijnt alleen als de browser volledig scherm toestaat (`document.fullscreenEnabled`). In het portfolio-iframe vereist dat `allow="fullscreen"` op het iframe in de portfolio-repo; zonder dat blijft de knop verborgen. iPhone-Safari ondersteunt de API niet op pagina's, daar is de knop ook niet zichtbaar.
 
@@ -78,8 +78,8 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 ## Wat er nu in zit
 
 - Receptenlijst (`#/`) en receptpagina (`#/recept/<id>`); routes zijn hash-routes zodat de app onder elk subpad werkt zonder serverconfiguratie.
-- Receptpagina: personen-slider (2 of 4) die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten en timers voor iedereen. Alleen voor de ingelogde beheerder (zie *Favorieten en delen alleen voor de beheerder*): de ster als favoriet en de deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren).
-- Favorieten: bij de beheerder staat in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers). Bezoekers zien dat blok, de sterren, de ster-knop en de deelknop niet; de recepten, timers en het afvinken werken voor hen gewoon.
+- Receptpagina: personen-slider (2 of 4) die hoeveelheden schaalt, inklapbare afvinkbare ingrediënten en timers voor iedereen. De deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren) en de Discord-knoppen zijn er voor iedereen. Alleen voor de ingelogde beheerder (zie *Favorieten alleen voor de beheerder*): de ster als favoriet.
+- Favorieten: bij de beheerder staat in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers). Bezoekers zien dat blok, de sterren en de ster-knop niet; de recepten, timers, afvinken en delen werken voor hen gewoon.
 - Nederlandse en Engelse interface. In het portfolio (iframe) volgt de app de taal van de NL/EN-knop in de titelbalk: dezelfde `localStorage`-sleutel `lang` (zelfde origin), met een `storage`-event bij wisselen; de app heeft daar geen eigen taalknop. Los draaiend (buiten een iframe) staat er wel een taalknop. Receptinhoud komt per taal uit de backend.
 - Receptenlijst: gegroepeerd onder kopjes Hoofdgerecht, Bijgerecht en Zoet (met aantal), een filter per soort, en per recept een categorie-icoon (er zijn nog geen afbeeldingen in de data).
 - Licht en donker thema via `prefers-color-scheme`; systeemlettertypen, geen externe requests.
@@ -101,12 +101,21 @@ Het backend-contract staat in de portfolio-repo (`backend/README.md`, portfolio 
 
 De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.service.ts`. Testdata in dit formaat staat in `src/testing/fixtures.ts`.
 
-## Favorieten en delen alleen voor de beheerder
+## Favorieten alleen voor de beheerder
 
-- De app heeft geen eigen login. Hij vraagt bij het starten `GET /api/auth/session` (zelfde origin, dus het sessiecookie van het portfolio gaat mee): 200 met `{ username, roles, csrfToken }` en de rol `admin` betekent beheerder, 204 of een fout betekent bezoeker (`src/app/auth.service.ts`). Inloggen doe je in het portfolio (Start, Inloggen); na inloggen laad je de recepten-app opnieuw om de ster en de deelknop te zien.
+- De app heeft geen eigen login. Hij vraagt bij het starten `GET /api/auth/session` (zelfde origin, dus het sessiecookie van het portfolio gaat mee): 200 met `{ username, roles, csrfToken }` en de rol `admin` betekent beheerder, 204 of een fout betekent bezoeker (`src/app/auth.service.ts`). Inloggen doe je in het portfolio (Start, Inloggen); na inloggen laad je de recepten-app opnieuw om de ster te zien.
 - Favorieten staan in de backend (portfolio-repo, tabel `recipe_favorite`, migratie V8) en niet meer in `localStorage`: `GET /api/recipes/favorites` (lijst van slugs), `PUT` en `DELETE /api/recipes/favorites/{id}` met de header `X-CSRF-Token` uit de sessie (`src/app/favorites.service.ts`). Zonder login geven die endpoints 401, zonder CSRF-token 403, bij een onbekend recept 404. Mislukt opslaan, dan draait de app de ster terug en toont een melding.
 - De beveiliging zit in de backend (`@RolesAllowed("admin")`); het verbergen van de knoppen in de app is alleen gemak.
 - Oude favorieten uit `localStorage` (`recipes.favorites`) worden niet overgenomen; de sleutel wordt niet meer gebruikt.
+
+## Naar je eigen Discord-server
+
+Voor iedereen, zonder inlog op de site. De backend (`royhendriks-dev/portfolio`, package `discord`, zie daar `backend/README.md`, *Discord-koppeling*) doet het zware werk; deze app heeft alleen knoppen (`src/app/discord.service.ts`, in `recipe-detail`).
+
+- Knop *Koppel je Discord-server* opent `/api/discord/connect` in een **nieuw tabblad** (Discord laat zich niet in een iframe laden). De bezoeker kiest bij Discord zelf een kanaal; daarna komt hij terug op `/apps/recipes/?discord=connected|denied|limit|error` en toont de app een melding (`role="status"`, te sluiten) die `?discord=` weer uit het adres haalt.
+- Is er een koppeling, dan staat er *Stuur naar Discord* (`POST /api/discord/share` met alleen `{recipe, lang, servings}`; de backend bouwt het bericht uit het eigen recept, de bezoeker kan geen tekst meesturen) en *Ontkoppel Discord* (`DELETE /api/discord/link`). Foutcodes (429 te snel, 410/401 koppeling weg, rest) worden korte meldingen in NL/EN.
+- De app bewaart zelf niets: de koppeling hangt aan een HttpOnly-cookie dat alleen de backend ziet, de webhook komt nooit in de browser. De status (`GET /api/discord/status`) wordt opgehaald bij het openen van een receptpagina en opnieuw als het tabblad weer focus krijgt (na koppelen in het andere tabblad).
+- Staat de koppeling uit op de server (geen client id en sleutel), dan toont de app de Discord-knoppen niet.
 
 ## Container en images
 

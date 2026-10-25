@@ -13,3 +13,6 @@
   /* terug-link (44 px) + marge (8 px) uit recipe-detail, zodat de bovenranden gelijk lopen */
   .side.below-back { margin-top: 52px; }
 }
+.notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.notice p { margin: 0; }
+.notice button { min-width: 44px; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-weight: 600; }
