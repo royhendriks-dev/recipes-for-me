@@ -18,6 +18,7 @@ Gebouwd:
 2. Favorieten met een ster, opgeslagen in de database bij het account van de beheerder, met een favorietenweergave (alleen zichtbaar voor de ingelogde beheerder).
 3. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord (alleen voor de beheerder). Er is geen automatische koppeling met een boodschappenapp.
 4. Keukentimers, personen-slider en een responsieve, mobile-first interface.
+5. Volledig-scherm-knop in de kopbalk (Fullscreen API, `src/app/fullscreen.service.ts`). De knop verschijnt alleen als de browser volledig scherm toestaat (`document.fullscreenEnabled`). In het portfolio-iframe vereist dat `allow="fullscreen"` op het iframe in de portfolio-repo; zonder dat blijft de knop verborgen. iPhone-Safari ondersteunt de API niet op pagina's, daar is de knop ook niet zichtbaar.
 
 Nog niet gebouwd: recepten aanmaken, bewerken, publiceren en verwijderen in de app (de recepten komen uit bestanden in de portfolio-repo), PWA, een eigen login in deze app.
 

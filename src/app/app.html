@@ -6,11 +6,24 @@
       </span>
       {{ i18n.t('appName') }}
     </a>
+    <div class="actions">
+    @if (fullscreen.supported) {
+      <button class="icon-btn" type="button" [attr.aria-label]="fullscreen.active() ? i18n.t('fullscreenExit') : i18n.t('fullscreenEnter')" [attr.aria-pressed]="fullscreen.active()" (click)="fullscreen.toggle()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          @if (fullscreen.active()) {
+            <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+          } @else {
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          }
+        </svg>
+      </button>
+    }
     @if (!i18n.embedded) {
       <button class="lang" type="button" [attr.lang]="i18n.otherLang()" [attr.aria-label]="i18n.t('switchTo')" (click)="i18n.toggle()">
       {{ i18n.otherLang().toUpperCase() }}
       </button>
     }
+    </div>
   </header>
   <div class="layout">
     <main>
