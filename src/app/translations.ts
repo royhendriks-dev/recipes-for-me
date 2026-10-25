@@ -4,6 +4,8 @@ export type TranslationKey =
   | 'appName'
   | 'language'
   | 'switchTo'
+  | 'fullscreenEnter'
+  | 'fullscreenExit'
   | 'minutes'
   | 'favorite'
   | 'favoriteSaved'
@@ -24,6 +26,22 @@ export type TranslationKey =
   | 'copied'
   | 'copyFailed'
   | 'ingredientsAsText'
+  | 'discordConnect'
+  | 'discordHint'
+  | 'discordSend'
+  | 'discordDisconnect'
+  | 'discordSent'
+  | 'discordRateLimited'
+  | 'discordGone'
+  | 'discordError'
+  | 'discordDisconnected'
+  | 'discordNewTab'
+  | 'discordNoticeConnected'
+  | 'discordNoticeDenied'
+  | 'discordNoticeLimit'
+  | 'discordNoticeError'
+  | 'dismiss'
+  | 'discordHeading'
   | 'steps'
   | 'loading'
   | 'error'
@@ -67,6 +85,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     appName: 'Recepten voor mij',
     language: 'Taal',
     switchTo: 'Switch to English',
+    fullscreenEnter: 'Volledig scherm',
+    fullscreenExit: 'Volledig scherm sluiten',
     minutes: 'minuten',
     favorite: 'Favoriet',
     favoriteSaved: 'Opgeslagen als favoriet',
@@ -88,6 +108,22 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     copied: 'Lijst gekopieerd naar het klembord',
     copyFailed: 'Kopiëren lukte niet. Selecteer de tekst hieronder en kopieer die zelf.',
     ingredientsAsText: 'Ingrediëntenlijst als tekst',
+    discordHeading: 'Naar je eigen Discord-server',
+    discordConnect: 'Koppel je Discord-server',
+    discordHint: 'Je kiest bij Discord zelf een kanaal; inloggen op deze site is niet nodig. We sturen alleen de ingrediënten van dit recept, nooit iets anders. Je kunt altijd ontkoppelen.',
+    discordSend: 'Stuur naar Discord',
+    discordDisconnect: 'Ontkoppel Discord',
+    discordSent: 'Naar Discord gestuurd',
+    discordRateLimited: 'Even wachten: je kunt maar eens per 10 seconden iets sturen',
+    discordGone: 'De koppeling bestaat niet meer. Koppel Discord opnieuw.',
+    discordError: 'Sturen naar Discord lukte niet. Probeer het later opnieuw.',
+    discordDisconnected: 'Discord ontkoppeld',
+    discordNewTab: 'opent in een nieuw tabblad',
+    discordNoticeConnected: 'Discord is gekoppeld. Je kunt nu een recept naar je kanaal sturen; ga terug naar de recepten-app of sluit dit tabblad.',
+    discordNoticeDenied: 'Koppelen met Discord is geannuleerd.',
+    discordNoticeLimit: 'Deze Discord-server heeft al het maximale aantal koppelingen. Ontkoppel er eerst een.',
+    discordNoticeError: 'Koppelen met Discord is niet gelukt. Probeer het opnieuw.',
+    dismiss: 'Sluiten',
     steps: 'Bereiding',
     loading: 'Recept laden…',
     error: 'Het recept kon niet worden geladen.',
@@ -130,6 +166,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     appName: 'Recipes for me',
     language: 'Language',
     switchTo: 'Wissel naar Nederlands',
+    fullscreenEnter: 'Full screen',
+    fullscreenExit: 'Exit full screen',
     minutes: 'minutes',
     favorite: 'Favorite',
     favoriteSaved: 'Saved as favorite',
@@ -151,6 +189,22 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     copied: 'List copied to the clipboard',
     copyFailed: 'Copying failed. Select the text below and copy it yourself.',
     ingredientsAsText: 'Ingredient list as text',
+    discordHeading: 'To your own Discord server',
+    discordConnect: 'Connect your Discord server',
+    discordHint: 'You pick a channel at Discord yourself; no login on this site is needed. We only send the ingredients of this recipe, never anything else. You can disconnect at any time.',
+    discordSend: 'Send to Discord',
+    discordDisconnect: 'Disconnect Discord',
+    discordSent: 'Sent to Discord',
+    discordRateLimited: 'Please wait: you can only send once every 10 seconds',
+    discordGone: 'The connection no longer exists. Connect Discord again.',
+    discordError: 'Sending to Discord failed. Please try again later.',
+    discordDisconnected: 'Discord disconnected',
+    discordNewTab: 'opens in a new tab',
+    discordNoticeConnected: 'Discord is connected. You can now send a recipe to your channel; go back to the recipes app or close this tab.',
+    discordNoticeDenied: 'Connecting to Discord was cancelled.',
+    discordNoticeLimit: 'This Discord server already has the maximum number of connections. Disconnect one first.',
+    discordNoticeError: 'Connecting to Discord failed. Please try again.',
+    dismiss: 'Close',
     steps: 'Method',
     loading: 'Loading recipe…',
     error: 'The recipe could not be loaded.',
