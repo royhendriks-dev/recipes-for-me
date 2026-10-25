@@ -4,6 +4,8 @@ export type TranslationKey =
   | 'appName'
   | 'language'
   | 'switchTo'
+  | 'fullscreenEnter'
+  | 'fullscreenExit'
   | 'minutes'
   | 'favorite'
   | 'favoriteSaved'
@@ -67,6 +69,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     appName: 'Recepten voor mij',
     language: 'Taal',
     switchTo: 'Switch to English',
+    fullscreenEnter: 'Volledig scherm',
+    fullscreenExit: 'Volledig scherm sluiten',
     minutes: 'minuten',
     favorite: 'Favoriet',
     favoriteSaved: 'Opgeslagen als favoriet',
@@ -130,6 +134,8 @@ export const TRANSLATIONS: Record<Lang, Record<TranslationKey, string>> = {
     appName: 'Recipes for me',
     language: 'Language',
     switchTo: 'Wissel naar Nederlands',
+    fullscreenEnter: 'Full screen',
+    fullscreenExit: 'Exit full screen',
     minutes: 'minutes',
     favorite: 'Favorite',
     favoriteSaved: 'Saved as favorite',
