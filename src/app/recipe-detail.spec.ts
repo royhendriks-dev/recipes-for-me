@@ -9,7 +9,7 @@ import { RecipeDetail } from './recipe-detail';
 import { TimerService } from './timer.service';
 
 describe('RecipeDetail', () => {
-  async function setup(recipe = RECIPE_FIXTURES.nl, admin = true) {
+  async function setup(recipe = RECIPE_FIXTURES.nl, admin = true, discord: { enabled: boolean; connected: boolean } = { enabled: false, connected: false }) {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [RecipeDetail],
@@ -21,8 +21,10 @@ describe('RecipeDetail', () => {
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
     await answerSession(http, admin);
+    http.expectOne('/api/discord/status').flush(discord);
     http.expectOne((r) => r.url === '/api/recipes/curry-kikkererwten').flush(recipe);
     await fixture.whenStable();
+    fixture.detectChanges();
     return { fixture, http, el: fixture.nativeElement as HTMLElement };
   }
 
@@ -35,6 +37,13 @@ describe('RecipeDetail', () => {
     await fixture.whenStable();
     expect(el.querySelector('.qty')?.textContent).toBe('120 g');
     expect(el.querySelector('output')?.textContent).toBe('2 personen');
+    expect(slider.min).toBe('2');
+    expect(slider.step).toBe('2');
+  });
+
+  it('zet de personen-slider in het ingrediëntenblok, zodat hij mee inklapt', async () => {
+    const { el } = await setup();
+    expect(el.querySelector('details.acc #servings')).not.toBeNull();
   });
 
   it('vinkt ingrediënten af en telt ze', async () => {
@@ -74,10 +83,37 @@ describe('RecipeDetail', () => {
     expect(el.querySelector('.toast')?.textContent).toContain('niet gelukt');
   });
 
-  it('toont zonder login geen favorietenknop en geen deelknop', async () => {
+  it('bewaart een favoriet van een bezoeker alleen in de browser', async () => {
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false);
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    http.expectNone('/api/recipes/favorites/curry-kikkererwten');
+    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('true');
+    expect(JSON.parse(localStorage.getItem('recipes.favorites') ?? '[]')).toEqual(['curry-kikkererwten']);
+
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('false');
+    expect(JSON.parse(localStorage.getItem('recipes.favorites') ?? '[]')).toEqual([]);
+  });
+
+  it('meldt een fout als de browser opslaan weigert', async () => {
+    const { fixture, el } = await setup(RECIPE_FIXTURES.nl, false);
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('vol', 'QuotaExceededError');
+    });
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('.toast')?.textContent).toContain('niet gelukt');
+    spy.mockRestore();
+  });
+
+  it('toont zonder login wel de favorietenknop en de deelknop', async () => {
     const { el } = await setup(RECIPE_FIXTURES.nl, false);
-    expect(el.querySelector('.fav')).toBeNull();
-    expect(el.querySelector('.share')).toBeNull();
+    expect(el.querySelector('.fav')).not.toBeNull();
+    expect(el.querySelector('.share .btn')).not.toBeNull();
+    expect(el.querySelector('.discord')).toBeNull();
     expect(el.querySelector('.ing input')).not.toBeNull();
     expect(el.querySelector('.steps')).not.toBeNull();
   });
@@ -104,6 +140,53 @@ describe('RecipeDetail', () => {
     await fixture.whenStable();
     expect(writeText).toHaveBeenCalled();
     expect(el.querySelector('textarea')?.value).toContain('Kikkererwten');
+  });
+
+  it('biedt koppelen aan Discord aan in een nieuw tabblad als Discord aanstaat maar niet gekoppeld is', async () => {
+    const { el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: false });
+    const link = el.querySelector('.discord a.btn') as HTMLAnchorElement;
+    expect(link.getAttribute('href')).toBe('/api/discord/connect');
+    expect(link.target).toBe('_blank');
+    expect(link.rel).toContain('noopener');
+    expect(el.querySelector('.discord button')).toBeNull();
+  });
+
+  it('stuurt het recept naar Discord en meldt de uitkomst', async () => {
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: true });
+    const send = el.querySelector('.discord .btn') as HTMLButtonElement;
+    expect(send.textContent).toContain('Stuur naar Discord');
+
+    send.click();
+    const request = http.expectOne('/api/discord/share');
+    expect(request.request.body).toEqual({ recipe: 'curry-kikkererwten', lang: 'nl', servings: expect.any(Number) });
+    request.flush(null, { status: 204, statusText: 'No Content' });
+    await fixture.whenStable();
+    expect(el.querySelector('.toast')?.textContent).toContain('Naar Discord gestuurd');
+
+    send.click();
+    http.expectOne('/api/discord/share').flush({ error: 'rate_limited' }, { status: 429, statusText: 'Too Many Requests' });
+    await fixture.whenStable();
+    expect(el.querySelector('.toast')?.textContent).toContain('Even wachten');
+  });
+
+  it('ontkoppelt Discord', async () => {
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: true });
+    (el.querySelector('.discord .btn.alt') as HTMLButtonElement).click();
+    http.expectOne('/api/discord/link').flush(null, { status: 204, statusText: 'No Content' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('.toast')?.textContent).toContain('ontkoppeld');
+    expect(el.querySelector('.discord a.btn')).not.toBeNull();
+  });
+
+  it('vraagt opnieuw te koppelen als de koppeling weg is', async () => {
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: true });
+    (el.querySelector('.discord .btn') as HTMLButtonElement).click();
+    http.expectOne('/api/discord/share').flush({ error: 'disconnected' }, { status: 410, statusText: 'Gone' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('.toast')?.textContent).toContain('Koppel Discord opnieuw');
+    expect(el.querySelector('.discord a.btn')).not.toBeNull();
   });
 
   it('vraagt het recept opnieuw op bij een taalwissel', async () => {

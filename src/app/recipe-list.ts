@@ -1,7 +1,6 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, resource, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from './auth.service';
 import { FavoritesService } from './favorites.service';
 import { I18nService } from './i18n.service';
 import { Category, RecipeSummary } from './recipe.model';
@@ -19,8 +18,6 @@ export class RecipeList {
   protected readonly i18n = inject(I18nService);
   private readonly recipes = inject(RecipeService);
   private readonly favorites = inject(FavoritesService);
-  /** Favorieten zijn alleen voor de ingelogde beheerder. */
-  protected readonly admin = inject(AuthService).admin;
 
   protected readonly categories = CATEGORIES;
   protected readonly filter = signal<Category | null>(null);
@@ -39,11 +36,8 @@ export class RecipeList {
       .filter((section) => section.recipes.length > 0);
   });
 
-  /** Favorieten bovenaan, in de volgorde van de lijst; leeg zonder login. */
+  /** Favorieten bovenaan, in de volgorde van de lijst; bezoekers zien hun eigen (lokale) favorieten. */
   protected readonly favoriteRecipes = computed(() => {
-    if (!this.admin()) {
-      return [];
-    }
     const chosen = this.filter();
     return (this.list.value() ?? []).filter(
       (recipe: RecipeSummary) => this.favorites.isFavorite(recipe.id) && (!chosen || chosen === recipe.category),
@@ -51,6 +45,6 @@ export class RecipeList {
   });
 
   protected isFavorite(id: string): boolean {
-    return this.admin() && this.favorites.isFavorite(id);
+    return this.favorites.isFavorite(id);
   }
 }
