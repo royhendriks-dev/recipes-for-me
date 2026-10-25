@@ -6,7 +6,7 @@ h2 { font-family: var(--font-display); font-size: 22px; margin: 0 0 14px; }
 .fav svg { width: 22px; height: 22px; fill: none; stroke: var(--star); stroke-width: 2; stroke-linejoin: round; }
 .fav[aria-pressed='true'] svg { fill: var(--star); }
 .fav[aria-pressed='true'] { border-color: var(--star); }
-.persons { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.persons { padding: 8px 0 12px; border-bottom: 1px solid var(--line); }
 .persons label { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; margin-bottom: 8px; }
 .persons output { font-family: var(--font-display); font-size: 20px; color: var(--accent); font-variant-numeric: tabular-nums; }
 input[type='range'] { width: 100%; accent-color: var(--accent); height: 44px; }

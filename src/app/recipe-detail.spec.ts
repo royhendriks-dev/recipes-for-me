@@ -41,6 +41,11 @@ describe('RecipeDetail', () => {
     expect(slider.step).toBe('2');
   });
 
+  it('zet de personen-slider in het ingrediëntenblok, zodat hij mee inklapt', async () => {
+    const { el } = await setup();
+    expect(el.querySelector('details.acc #servings')).not.toBeNull();
+  });
+
   it('vinkt ingrediënten af en telt ze', async () => {
     const { fixture, el } = await setup();
     (el.querySelector('.ing input') as HTMLInputElement).click();
