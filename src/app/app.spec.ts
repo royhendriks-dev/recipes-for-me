@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { RECIPE_FIXTURES } from '../testing/fixtures';
 import { App } from './app';
+import { FullscreenService } from './fullscreen.service';
 import { I18nService } from './i18n.service';
 import { routes } from './app.routes';
 
@@ -70,5 +71,36 @@ describe('App', () => {
     fixture.detectChanges();
     http.match(() => true);
     expect(side.classList.contains('below-back')).toBe(true);
+  });
+
+  it('toont de volledig-scherm-knop alleen als de browser dat toestaat', () => {
+    const fullscreen = TestBed.inject(FullscreenService) as { supported: boolean };
+    fullscreen.supported = false;
+    let fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('.icon-btn')).toBeNull();
+
+    fullscreen.supported = true;
+    fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const button = (fixture.nativeElement as HTMLElement).querySelector('.icon-btn') as HTMLButtonElement;
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+    expect(button.getAttribute('aria-label')).toBeTruthy();
+  });
+  it('toont na terugkomst van Discord een melding die je kunt sluiten', async () => {
+    window.history.replaceState(null, '', '/?discord=limit');
+    TestBed.inject(I18nService).lang.set('nl');
+    const fixture = TestBed.createComponent(App);
+    await TestBed.inject(Router).navigateByUrl('/');
+    fixture.detectChanges();
+    TestBed.inject(HttpTestingController).expectOne((r) => r.url === '/api/recipes').flush([]);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.notice')?.getAttribute('role')).toBe('status');
+    expect(el.querySelector('.notice p')?.textContent).toContain('maximale aantal koppelingen');
+    (el.querySelector('.notice button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(el.querySelector('.notice')).toBeNull();
+    window.history.replaceState(null, '', '/');
   });
 });

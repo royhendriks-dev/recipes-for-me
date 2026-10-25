@@ -7,6 +7,7 @@ import { FavoritesService } from './favorites.service';
 
 describe('AuthService en FavoritesService', () => {
   beforeEach(() => {
+    localStorage.clear();
     TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
   });
 
@@ -43,5 +44,20 @@ describe('AuthService en FavoritesService', () => {
     http.expectOne('/api/recipes/favorites').flush('stuk', { status: 500, statusText: 'Server Error' });
     await new Promise((resolve) => setTimeout(resolve));
     expect(favorites.ids()).toEqual([]);
+  });
+
+  it('leest lokale favorieten van een bezoeker en negeert vervuilde opslag', async () => {
+    localStorage.setItem('recipes.favorites', JSON.stringify(['a', 3, 'b']));
+    const favorites = TestBed.inject(FavoritesService);
+    await answerSession(TestBed.inject(HttpTestingController), false);
+    expect(favorites.ids()).toEqual(['a', 'b']);
+    localStorage.setItem('recipes.favorites', '{kapot');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    expect(TestBed.inject(FavoritesService).ids()).toEqual([]);
+    localStorage.setItem('recipes.favorites', '"geen lijst"');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    expect(TestBed.inject(FavoritesService).ids()).toEqual([]);
   });
 });

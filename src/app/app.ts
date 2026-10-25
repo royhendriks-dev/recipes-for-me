@@ -2,6 +2,8 @@ import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { DiscordService } from './discord.service';
+import { FullscreenService } from './fullscreen.service';
 import { I18nService } from './i18n.service';
 import { TimerPanel } from './timer-panel';
 
@@ -13,6 +15,8 @@ import { TimerPanel } from './timer-panel';
 })
 export class App {
   protected readonly i18n = inject(I18nService);
+  protected readonly fullscreen = inject(FullscreenService);
+  protected readonly discord = inject(DiscordService);
   private readonly router = inject(Router);
   /** Op de receptpagina staat de kaart onder de terug-link; het timerpaneel schuift mee naar beneden. */
   protected readonly onDetail = toSignal(

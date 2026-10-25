@@ -29,4 +29,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          args: -Dsonar.qualitygate.wait=true
+          # Op een push naar develop geeft SonarQube Cloud (gratis plan) de gate-status van een niet-main-branch niet vrij;
+          # wachten op de gate faalt dan. PR's en main blijven wachten.
+          args: ${{ (github.event_name == 'push' && github.ref_name == 'develop') && '-Dsonar.verbose=false' || '-Dsonar.qualitygate.wait=true' }}
