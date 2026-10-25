@@ -87,4 +87,20 @@ describe('App', () => {
     expect(button.getAttribute('aria-pressed')).toBe('false');
     expect(button.getAttribute('aria-label')).toBeTruthy();
   });
+  it('toont na terugkomst van Discord een melding die je kunt sluiten', async () => {
+    window.history.replaceState(null, '', '/?discord=limit');
+    TestBed.inject(I18nService).lang.set('nl');
+    const fixture = TestBed.createComponent(App);
+    await TestBed.inject(Router).navigateByUrl('/');
+    fixture.detectChanges();
+    TestBed.inject(HttpTestingController).expectOne((r) => r.url === '/api/recipes').flush([]);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.notice')?.getAttribute('role')).toBe('status');
+    expect(el.querySelector('.notice p')?.textContent).toContain('maximale aantal koppelingen');
+    (el.querySelector('.notice button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(el.querySelector('.notice')).toBeNull();
+    window.history.replaceState(null, '', '/');
+  });
 });

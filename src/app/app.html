@@ -25,6 +25,12 @@
     }
     </div>
   </header>
+  @if (discord.notice(); as notice) {
+    <div class="notice" role="status">
+      <p>{{ i18n.t(notice === 'connected' ? 'discordNoticeConnected' : notice === 'denied' ? 'discordNoticeDenied' : notice === 'limit' ? 'discordNoticeLimit' : 'discordNoticeError') }}</p>
+      <button type="button" (click)="discord.dismissNotice()">{{ i18n.t('dismiss') }}</button>
+    </div>
+  }
   <div class="layout">
     <main>
       <router-outlet />

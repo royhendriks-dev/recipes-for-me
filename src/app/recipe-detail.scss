@@ -28,6 +28,9 @@ input[type='range'] { width: 100%; accent-color: var(--accent); height: 44px; }
 .note { color: var(--muted); font-size: 14px; }
 .share { margin: 16px 0; display: grid; gap: 10px; }
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 18px; border-radius: 10px; border: 1px solid transparent; font-weight: 600; background: var(--accent); color: var(--accent-fg); }
+.btn.alt { background: var(--surface-2); color: var(--fg); border-color: var(--line); }
+a.btn { text-decoration: none; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .hint { color: var(--muted); font-size: 14px; margin: 0; }
 .fallback { width: 100%; min-height: 150px; font: inherit; font-size: 14px; background: var(--surface-2); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
 .steps-section { margin-top: 24px; }

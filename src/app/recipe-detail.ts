@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, input, resource, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from './auth.service';
+import { DiscordService } from './discord.service';
 import { FavoritesService } from './favorites.service';
 import { I18nService } from './i18n.service';
 import { formatQuantity } from './quantity';
@@ -21,7 +22,8 @@ export class RecipeDetail {
   private readonly recipes = inject(RecipeService);
   private readonly timers = inject(TimerService);
   private readonly favoritesService = inject(FavoritesService);
-  /** Ster en deelknop zijn alleen voor de ingelogde beheerder. */
+  protected readonly discord = inject(DiscordService);
+  /** De favorietenster is alleen voor de ingelogde beheerder; delen kan iedereen. */
   protected readonly admin = inject(AuthService).admin;
 
   /** Komt uit de route (`recept/:id`). */
@@ -50,6 +52,7 @@ export class RecipeDetail {
   private toastTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
+    void this.discord.refresh();
     // Begin bij het aantal personen van het recept (de slider kent alleen 2 en 4).
     effect(() => {
       const recipe = this.current();
@@ -107,7 +110,7 @@ export class RecipeDetail {
 
   protected async share(): Promise<void> {
     const recipe = this.current();
-    if (!recipe || !this.admin()) {
+    if (!recipe) {
       return;
     }
     const text = buildShareText(
@@ -132,6 +135,27 @@ export class RecipeDetail {
       }
     }
     await this.copy(text);
+  }
+
+  protected async sendToDiscord(): Promise<void> {
+    const recipe = this.current();
+    if (!recipe) {
+      return;
+    }
+    const result = await this.discord.share(recipe.id, this.i18n.lang(), this.servings());
+    const messages = {
+      sent: 'discordSent',
+      rate_limited: 'discordRateLimited',
+      disconnected: 'discordGone',
+      not_connected: 'discordGone',
+      error: 'discordError',
+    } as const;
+    this.showToast(this.i18n.t(messages[result]));
+  }
+
+  protected async disconnectDiscord(): Promise<void> {
+    const done = await this.discord.disconnect();
+    this.showToast(this.i18n.t(done ? 'discordDisconnected' : 'discordError'));
   }
 
   private async copy(text: string): Promise<void> {
