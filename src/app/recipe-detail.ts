@@ -1,7 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, input, resource, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthService } from './auth.service';
 import { DiscordService } from './discord.service';
 import { FavoritesService } from './favorites.service';
 import { I18nService } from './i18n.service';
@@ -23,8 +22,6 @@ export class RecipeDetail {
   private readonly timers = inject(TimerService);
   private readonly favoritesService = inject(FavoritesService);
   protected readonly discord = inject(DiscordService);
-  /** De favorietenster is alleen voor de ingelogde beheerder; delen kan iedereen. */
-  protected readonly admin = inject(AuthService).admin;
 
   /** Komt uit de route (`recept/:id`). */
   readonly id = input.required<string>();
