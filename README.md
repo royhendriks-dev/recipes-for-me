@@ -1,6 +1,6 @@
 # recipes-for-me
 
-Een receptenwebsite die je op je telefoon prettig kunt gebruiken. Iedereen kan de gepubliceerde recepten bekijken; de eigenaar logt in om recepten te beheren en favorieten te markeren.
+Een receptenwebsite die je op je telefoon prettig kunt gebruiken. Iedereen kan de gepubliceerde recepten bekijken; iedereen kan favorieten markeren (bezoekers in de eigen browser, de eigenaar in de database).
 
 > **Status:** de app draait als microservice (pod `recipes`, release 1.0.0) achter het portfolio op `/apps/recipes/`. De Angular-frontend (receptenlijst en receptpagina, NL/EN) haalt recepten op via de API-aanroepen hieronder; de backend-endpoints staan in `royhendriks-dev/portfolio`. Recepten beheren in de app zelf is er niet: de recepten komen als JSON-bestanden uit de portfolio-repo.
 
@@ -15,7 +15,7 @@ De app is bereikbaar via het portfolio op `/apps/recipes/` (iframe in het termin
 Gebouwd:
 
 1. Recepten bekijken zonder in te loggen (titel, categorie, ingrediënten met hoeveelheden, bereiding, notities en metadata).
-2. Favorieten met een ster, opgeslagen in de database bij het account van de beheerder, met een favorietenweergave (alleen zichtbaar voor de ingelogde beheerder).
+2. Favorieten met een ster en een favorietenweergave, voor iedereen: bezoekers bewaren ze in de eigen browser, de beheerder in de database.
 3. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord (voor iedereen). Er is geen automatische koppeling met een boodschappenapp. Daarnaast kan elke bezoeker, zonder inlog, een recept naar zijn eigen Discord-server sturen (zie *Naar je eigen Discord-server*).
 4. Keukentimers, personen-slider en een responsieve, mobile-first interface.
 5. Volledig-scherm-knop in de kopbalk (Fullscreen API, `src/app/fullscreen.service.ts`). De knop verschijnt alleen als de browser volledig scherm toestaat (`document.fullscreenEnabled`). In het portfolio-iframe vereist dat `allow="fullscreen"` op het iframe in de portfolio-repo; zonder dat blijft de knop verborgen. iPhone-Safari ondersteunt de API niet op pagina's, daar is de knop ook niet zichtbaar.
@@ -78,8 +78,9 @@ De app gebruikt `<base href="./">` en bouwt daarom zonder aanpassing onder een s
 ## Wat er nu in zit
 
 - Receptenlijst (`#/`) en receptpagina (`#/recept/<id>`); routes zijn hash-routes zodat de app onder elk subpad werkt zonder serverconfiguratie.
-- Receptpagina: personen-slider (2 of 4) die hoeveelheden schaalt en bovenin het inklapbare ingrediëntenblok staat (inklappen verbergt dus ook de slider), inklapbare afvinkbare ingrediënten en timers voor iedereen. De deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren) en de Discord-knoppen zijn er voor iedereen. Alleen voor de ingelogde beheerder (zie *Favorieten alleen voor de beheerder*): de ster als favoriet.
+- Receptpagina: personen-slider (2 of 4) die hoeveelheden schaalt en bovenin het inklapbare ingrediëntenblok staat (inklappen verbergt dus ook de slider), inklapbare afvinkbare ingrediënten en timers voor iedereen. De deelknop voor de ingrediëntenlijst (Web Share API, anders klembord, anders een tekstvak om zelf te kopiëren) en de Discord-knoppen zijn er voor iedereen. De ster als favoriet is er ook voor iedereen (zie *Favorieten*).
 - Favorieten: bij de beheerder staat in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers). Bezoekers zien dat blok, de sterren en de ster-knop niet; de recepten, timers, afvinken en delen werken voor hen gewoon.
+- Favorieten: iedereen ziet in de receptenlijst een blok *Favorieten* bovenaan en een ster bij favoriete recepten (met verborgen tekst *(Favoriet)* voor schermlezers), zodra er een favoriet is. Bezoekers zien alleen hun eigen favorieten.
 - Nederlandse en Engelse interface. In het portfolio (iframe) volgt de app de taal van de NL/EN-knop in de titelbalk: dezelfde `localStorage`-sleutel `lang` (zelfde origin), met een `storage`-event bij wisselen; de app heeft daar geen eigen taalknop. Los draaiend (buiten een iframe) staat er wel een taalknop. Receptinhoud komt per taal uit de backend.
 - Receptenlijst: gegroepeerd onder kopjes Hoofdgerecht, Bijgerecht en Zoet (met aantal), een filter per soort, en per recept een categorie-icoon (er zijn nog geen afbeeldingen in de data).
 - Licht en donker thema via `prefers-color-scheme`; systeemlettertypen, geen externe requests.
@@ -101,12 +102,17 @@ Het backend-contract staat in de portfolio-repo (`backend/README.md`, portfolio 
 
 De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.service.ts`. Testdata in dit formaat staat in `src/testing/fixtures.ts`.
 
-## Favorieten alleen voor de beheerder
+## Favorieten
+
+- Bezoekers (zonder login): favorieten staan in `localStorage` van de eigen browser onder de sleutel `recipes.favorites` (een JSON-lijst met recept-slugs, maximaal 500 gelezen). Er gaat niets naar de server, er is geen cookie en geen tracking; het is functionele opslag die de bezoeker zelf aanzet met de ster. De lijst is per browser en per apparaat en verdwijnt als de bezoeker de sitegegevens wist. Weigert de browser opslaan (privémodus, vol), dan toont de app de melding *niet gelukt*. Gekozen boven een cookie omdat een cookie bij elk verzoek meegestuurd wordt, maar 4 KB groot is en voor niets op de server nodig is.
+- De beheerder (Roy): favorieten staan in de backend en zijn dus op elk apparaat gelijk (zie hieronder). Na inloggen wisselt de app van de lokale lijst naar de lijst uit de backend; lokale favorieten worden niet naar de backend gekopieerd.
+
+## Beheerder: login en favorieten in de backend
 
 - De app heeft geen eigen login. Hij vraagt bij het starten `GET /api/auth/session` (zelfde origin, dus het sessiecookie van het portfolio gaat mee): 200 met `{ username, roles, csrfToken }` en de rol `admin` betekent beheerder, 204 of een fout betekent bezoeker (`src/app/auth.service.ts`). Inloggen doe je in het portfolio (Start, Inloggen); na inloggen laad je de recepten-app opnieuw om de ster te zien.
 - Favorieten staan in de backend (portfolio-repo, tabel `recipe_favorite`, migratie V8) en niet meer in `localStorage`: `GET /api/recipes/favorites` (lijst van slugs), `PUT` en `DELETE /api/recipes/favorites/{id}` met de header `X-CSRF-Token` uit de sessie (`src/app/favorites.service.ts`). Zonder login geven die endpoints 401, zonder CSRF-token 403, bij een onbekend recept 404. Mislukt opslaan, dan draait de app de ster terug en toont een melding.
-- De beveiliging zit in de backend (`@RolesAllowed("admin")`); het verbergen van de knoppen in de app is alleen gemak.
-- Oude favorieten uit `localStorage` (`recipes.favorites`) worden niet overgenomen; de sleutel wordt niet meer gebruikt.
+- De beveiliging zit in de backend (`@RolesAllowed("admin")`); de app vraagt alleen een favorietenlijst bij de backend als je beheerder bent.
+- Eerdere favorieten uit `localStorage` van de beheerder werden niet overgenomen in de backend; dezelfde sleutel `recipes.favorites` wordt nu door bezoekers gebruikt.
 
 ## Naar je eigen Discord-server
 
