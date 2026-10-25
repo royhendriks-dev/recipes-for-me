@@ -21,7 +21,7 @@ export class RecipeDetail {
   private readonly recipes = inject(RecipeService);
   private readonly timers = inject(TimerService);
   private readonly favoritesService = inject(FavoritesService);
-  /** Ster en deelknop zijn alleen voor de ingelogde beheerder. */
+  /** De deelknop is (nog) alleen voor de ingelogde beheerder; de ster is voor iedereen. */
   protected readonly admin = inject(AuthService).admin;
 
   /** Komt uit de route (`recept/:id`). */

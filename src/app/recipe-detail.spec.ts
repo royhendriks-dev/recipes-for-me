@@ -74,9 +74,35 @@ describe('RecipeDetail', () => {
     expect(el.querySelector('.toast')?.textContent).toContain('niet gelukt');
   });
 
-  it('toont zonder login geen favorietenknop en geen deelknop', async () => {
+  it('bewaart een favoriet van een bezoeker alleen in de browser', async () => {
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false);
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    http.expectNone('/api/recipes/favorites/curry-kikkererwten');
+    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('true');
+    expect(JSON.parse(localStorage.getItem('recipes.favorites') ?? '[]')).toEqual(['curry-kikkererwten']);
+
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('false');
+    expect(JSON.parse(localStorage.getItem('recipes.favorites') ?? '[]')).toEqual([]);
+  });
+
+  it('meldt een fout als de browser opslaan weigert', async () => {
+    const { fixture, el } = await setup(RECIPE_FIXTURES.nl, false);
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('vol', 'QuotaExceededError');
+    });
+    (el.querySelector('.fav') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(el.querySelector('.toast')?.textContent).toContain('niet gelukt');
+    spy.mockRestore();
+  });
+
+  it('toont zonder login wel de favorietenknop maar geen deelknop', async () => {
     const { el } = await setup(RECIPE_FIXTURES.nl, false);
-    expect(el.querySelector('.fav')).toBeNull();
+    expect(el.querySelector('.fav')).not.toBeNull();
     expect(el.querySelector('.share')).toBeNull();
     expect(el.querySelector('.ing input')).not.toBeNull();
     expect(el.querySelector('.steps')).not.toBeNull();

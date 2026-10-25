@@ -8,8 +8,11 @@ import { I18nService } from './i18n.service';
 import { RecipeList } from './recipe-list';
 
 describe('RecipeList', () => {
-  async function setup(admin = false, favorites: string[] = []) {
+  async function setup(admin = false, favorites: string[] = [], local: string[] | null = null) {
     localStorage.clear();
+    if (local) {
+      localStorage.setItem('recipes.favorites', JSON.stringify(local));
+    }
     await TestBed.configureTestingModule({
       imports: [RecipeList],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
@@ -80,7 +83,21 @@ describe('RecipeList', () => {
     expect(el.querySelectorAll('.star')).toHaveLength(2);
   });
 
-  it('toont zonder login geen favorieten en geen sterren', async () => {
+  it('toont een bezoeker alleen de eigen lokale favorieten, zonder aanroep naar de backend', async () => {
+    const { fixture, http, el } = await setup(false, [], ['sparse']);
+    http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(Array.from(el.querySelectorAll('h2')).map((h) => h.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
+      'Favorieten (1)',
+      'Hoofdgerecht (1)',
+      'Zoet (1)',
+    ]);
+    expect(el.querySelectorAll('.star')).toHaveLength(2);
+    http.expectNone('/api/recipes/favorites');
+  });
+
+  it('toont zonder favorieten geen favorietenblok en geen sterren', async () => {
     const { fixture, http, el } = await setup(false);
     http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
     await fixture.whenStable();
