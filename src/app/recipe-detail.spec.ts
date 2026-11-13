@@ -2,14 +2,13 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { answerSession } from '../testing/auth';
 import { RECIPE_FIXTURES, RECIPE_SPARSE } from '../testing/fixtures';
 import { I18nService } from './i18n.service';
 import { RecipeDetail } from './recipe-detail';
 import { TimerService } from './timer.service';
 
 describe('RecipeDetail', () => {
-  async function setup(recipe = RECIPE_FIXTURES.nl, admin = true, discord: { enabled: boolean; connected: boolean } = { enabled: false, connected: false }) {
+  async function setup(recipe = RECIPE_FIXTURES.nl, discord: { enabled: boolean; connected: boolean } = { enabled: false, connected: false }) {
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [RecipeDetail],
@@ -20,7 +19,6 @@ describe('RecipeDetail', () => {
     fixture.componentRef.setInput('id', 'curry-kikkererwten');
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
-    await answerSession(http, admin);
     http.expectOne('/api/discord/status').flush(discord);
     http.expectOne((r) => r.url === '/api/recipes/curry-kikkererwten').flush(recipe);
     await fixture.whenStable();
@@ -54,37 +52,8 @@ describe('RecipeDetail', () => {
     expect(el.querySelector('.ing li')?.classList).toContain('done');
   });
 
-  it('bewaart een favoriet in de backend, met het CSRF-token', async () => {
-    const { fixture, http, el } = await setup();
-    (el.querySelector('.fav') as HTMLButtonElement).click();
-    const put = http.expectOne('/api/recipes/favorites/curry-kikkererwten');
-    expect(put.request.method).toBe('PUT');
-    expect(put.request.headers.get('X-CSRF-Token')).toBe('csrf-token-1');
-    put.flush(null, { status: 204, statusText: 'No Content' });
-    await fixture.whenStable();
-    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('true');
-    expect(localStorage.getItem('recipes.favorites')).toBeNull();
-
-    (el.querySelector('.fav') as HTMLButtonElement).click();
-    const del = http.expectOne('/api/recipes/favorites/curry-kikkererwten');
-    expect(del.request.method).toBe('DELETE');
-    del.flush(null, { status: 204, statusText: 'No Content' });
-    await fixture.whenStable();
-    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('false');
-  });
-
-  it('draait een favoriet terug en meldt het als opslaan mislukt', async () => {
-    const { fixture, http, el } = await setup();
-    (el.querySelector('.fav') as HTMLButtonElement).click();
-    http.expectOne('/api/recipes/favorites/curry-kikkererwten').flush({ error: 'forbidden' }, { status: 403, statusText: 'Forbidden' });
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(el.querySelector('.fav')?.getAttribute('aria-pressed')).toBe('false');
-    expect(el.querySelector('.toast')?.textContent).toContain('niet gelukt');
-  });
-
-  it('bewaart een favoriet van een bezoeker alleen in de browser', async () => {
-    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false);
+  it('bewaart een favoriet alleen in de browser', async () => {
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl);
     (el.querySelector('.fav') as HTMLButtonElement).click();
     await fixture.whenStable();
     http.expectNone('/api/recipes/favorites/curry-kikkererwten');
@@ -98,7 +67,7 @@ describe('RecipeDetail', () => {
   });
 
   it('meldt een fout als de browser opslaan weigert', async () => {
-    const { fixture, el } = await setup(RECIPE_FIXTURES.nl, false);
+    const { fixture, el } = await setup(RECIPE_FIXTURES.nl);
     const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('vol', 'QuotaExceededError');
     });
@@ -109,8 +78,8 @@ describe('RecipeDetail', () => {
     spy.mockRestore();
   });
 
-  it('toont zonder login wel de favorietenknop en de deelknop', async () => {
-    const { el } = await setup(RECIPE_FIXTURES.nl, false);
+  it('toont de favorietenknop en de deelknop', async () => {
+    const { el } = await setup(RECIPE_FIXTURES.nl);
     expect(el.querySelector('.fav')).not.toBeNull();
     expect(el.querySelector('.share .btn')).not.toBeNull();
     expect(el.querySelector('.discord')).toBeNull();
@@ -143,7 +112,7 @@ describe('RecipeDetail', () => {
   });
 
   it('biedt koppelen aan Discord aan in een nieuw tabblad als Discord aanstaat maar niet gekoppeld is', async () => {
-    const { el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: false });
+    const { el } = await setup(RECIPE_FIXTURES.nl, { enabled: true, connected: false });
     const link = el.querySelector('.discord a.btn') as HTMLAnchorElement;
     expect(link.getAttribute('href')).toBe('/api/discord/connect');
     expect(link.target).toBe('_blank');
@@ -152,7 +121,7 @@ describe('RecipeDetail', () => {
   });
 
   it('stuurt het recept naar Discord en meldt de uitkomst', async () => {
-    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: true });
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, { enabled: true, connected: true });
     const send = el.querySelector('.discord .btn') as HTMLButtonElement;
     expect(send.textContent).toContain('Stuur naar Discord');
 
@@ -170,7 +139,7 @@ describe('RecipeDetail', () => {
   });
 
   it('ontkoppelt Discord', async () => {
-    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: true });
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, { enabled: true, connected: true });
     (el.querySelector('.discord .btn.alt') as HTMLButtonElement).click();
     http.expectOne('/api/discord/link').flush(null, { status: 204, statusText: 'No Content' });
     await fixture.whenStable();
@@ -180,7 +149,7 @@ describe('RecipeDetail', () => {
   });
 
   it('vraagt opnieuw te koppelen als de koppeling weg is', async () => {
-    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, false, { enabled: true, connected: true });
+    const { fixture, http, el } = await setup(RECIPE_FIXTURES.nl, { enabled: true, connected: true });
     (el.querySelector('.discord .btn') as HTMLButtonElement).click();
     http.expectOne('/api/discord/share').flush({ error: 'disconnected' }, { status: 410, statusText: 'Gone' });
     await fixture.whenStable();
