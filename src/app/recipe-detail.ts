@@ -96,12 +96,12 @@ export class RecipeDetail {
     });
   }
 
-  protected async toggleFavorite(): Promise<void> {
+  protected toggleFavorite(): void {
     const recipe = this.current();
     if (!recipe) {
       return;
     }
-    const result = await this.favoritesService.toggle(recipe.id);
+    const result = this.favoritesService.toggle(recipe.id);
     this.showToast(this.i18n.t(result === 'added' ? 'favoriteAdded' : result === 'removed' ? 'favoriteRemoved' : 'favoriteError'));
   }
 

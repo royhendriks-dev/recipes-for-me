@@ -7,13 +7,13 @@ describe('FavoritesService', () => {
     TestBed.configureTestingModule({});
   });
 
-  it('start leeg en bewaart een favoriet alleen in de browser', async () => {
+  it('start leeg en bewaart een favoriet alleen in de browser', () => {
     const favorites = TestBed.inject(FavoritesService);
     expect(favorites.ids()).toEqual([]);
-    expect(await favorites.toggle('a')).toBe('added');
+    expect(favorites.toggle('a')).toBe('added');
     expect(favorites.isFavorite('a')).toBe(true);
     expect(JSON.parse(localStorage.getItem('recipes.favorites') ?? '[]')).toEqual(['a']);
-    expect(await favorites.toggle('a')).toBe('removed');
+    expect(favorites.toggle('a')).toBe('removed');
     expect(favorites.ids()).toEqual([]);
   });
 

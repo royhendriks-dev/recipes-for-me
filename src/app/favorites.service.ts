@@ -20,7 +20,7 @@ export class FavoritesService {
   }
 
   /** Zet de favoriet om; geeft 'error' als de browser opslaan weigert. */
-  async toggle(id: string): Promise<FavoriteResult> {
+  toggle(id: string): FavoriteResult {
     const before = this.ids();
     const on = !before.includes(id);
     const after = on ? [...before, id] : before.filter((x) => x !== id);
