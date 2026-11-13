@@ -15,12 +15,12 @@ De app is bereikbaar via het portfolio op `/apps/recipes/` (iframe in het termin
 Gebouwd:
 
 1. Recepten bekijken zonder in te loggen (titel, categorie, ingrediënten met hoeveelheden, bereiding, notities en metadata).
-2. Favorieten met een ster en een favorietenweergave, voor iedereen: bezoekers bewaren ze in de eigen browser, de beheerder in de database.
+2. Favorieten met een ster en een favorietenweergave, voor iedereen, in de eigen browser.
 3. Ingrediënten delen naar je telefoon: Web Share API waar beschikbaar, anders kopiëren naar het klembord (voor iedereen). Er is geen automatische koppeling met een boodschappenapp. Daarnaast kan elke bezoeker, zonder inlog, een recept naar zijn eigen Discord-server sturen (zie *Naar je eigen Discord-server*).
 4. Keukentimers, personen-slider en een responsieve, mobile-first interface.
 5. Volledig-scherm-knop in de kopbalk (Fullscreen API, `src/app/fullscreen.service.ts`). De knop verschijnt alleen als de browser volledig scherm toestaat (`document.fullscreenEnabled`). In het portfolio-iframe vereist dat `allow="fullscreen"` op het iframe in de portfolio-repo; zonder dat blijft de knop verborgen. iPhone-Safari ondersteunt de API niet op pagina's, daar is de knop ook niet zichtbaar.
 
-Nog niet gebouwd: recepten aanmaken, bewerken, publiceren en verwijderen in de app (de recepten komen uit bestanden in de portfolio-repo), PWA, een eigen login in deze app.
+Nog niet gebouwd: recepten aanmaken, bewerken, publiceren en verwijderen in de app (de recepten komen uit bestanden in de portfolio-repo), PWA. Er is geen login in deze app en ook niet in het portfolio.
 
 Bewust uitgesteld: recepten van meerdere gebruikers, beoordelingen, weekmenu's, boodschappenintegraties en een eigen backend.
 
@@ -29,10 +29,10 @@ Bewust uitgesteld: recepten van meerdere gebruikers, beoordelingen, weekmenu's, 
 | Onderdeel | Waar | Technologie |
 |---|---|---|
 | Frontend | deze repository | Angular, TypeScript, SCSS, nginx-container |
-| Backend, authenticatie, database | [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio) | Quarkus (Java), PostgreSQL, Flyway |
+| Backend, database | [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio) | Quarkus (Java), PostgreSQL, Flyway |
 
 - De receptenfrontend praat same-origin met de backend: de browser laadt de app via het portfolio (`/apps/recipes/`) en roept `/api/` aan op dezelfde site, waar de nginx van het portfolio (niet de nginx in deze repo, die `/api/` niet doorstuurt) het naar de backend stuurt. CORS of cookie-instellingen worden daarvoor niet versoepeld. De pod `recipes` zelf praat niet met de backend (NetworkPolicies in de portfolio-repo).
-- Deze app heeft geen eigen login. Hij vraagt `GET /api/auth/session` en gebruikt de sessie van het portfolio; inloggen doe je daar. De nginx van het portfolio geeft de sessiecookie niet door aan de pod.
+- Deze app heeft geen login en vraagt niets over een sessie: alle bezoekers zijn gelijk. De login van het portfolio is op 2026-11-13 helemaal vervallen.
 - Receptfunctionaliteit staat in de backend als apart package met eigen migraties (`recipe`, `recipe_translation`, `recipe_favorite`), zodat het later te splitsen blijft.
 - Autorisatie gebeurt altijd op de server; de frontend toont of verbergt alleen.
 
@@ -46,12 +46,12 @@ Oorspronkelijk plan; de stand per fase is gecontroleerd tegen de repo en de port
 |---|---|---|---|
 | 0 | Keuzes vastleggen, README en `AGENTS.md` | recipes-for-me | gedaan |
 | 1 | Migratie en package `recipe`: publiek lezen (beheer en publiceren niet) | portfolio | lezen gedaan (V6, V7); beheer niet gebouwd |
-| 2 | Favorieten-endpoints met tests | portfolio | gedaan (V8) |
-| 3 | Angular-skelet: routing, publieke lijst en detail | recipes-for-me | gedaan; eigen login vervallen (sessie van het portfolio) |
+| 2 | Favorieten-endpoints met tests | portfolio | gedaan (V8), later weer verwijderd met de login |
+| 3 | Angular-skelet: routing, publieke lijst en detail | recipes-for-me | gedaan; geen login |
 | 4 | Beheer-UI | recipes-for-me | niet gebouwd |
 | 5 | Favorietenster, favorietenweergave, ingrediënten delen | recipes-for-me | gedaan |
 | 6 | PWA, laad-, leeg- en foutstaten, mobiele controle | recipes-for-me | PWA niet gebouwd |
-| 7 | Infrastructuur en login-hardening voor livegang | portfolio | pod in `k8s/recipes.yaml`; login-hardening in de portfolio-repo |
+| 7 | Infrastructuur voor livegang | portfolio | pod in `k8s/recipes.yaml` |
 
 ## Werkwijze
 
@@ -103,15 +103,8 @@ De types staan in `src/app/recipe.model.ts`, de aanroepen in `src/app/recipe.ser
 
 ## Favorieten
 
-- Bezoekers (zonder login): favorieten staan in `localStorage` van de eigen browser onder de sleutel `recipes.favorites` (een JSON-lijst met recept-slugs, maximaal 500 gelezen). Er gaat niets naar de server, er is geen cookie en geen tracking; het is functionele opslag die de bezoeker zelf aanzet met de ster. De lijst is per browser en per apparaat en verdwijnt als de bezoeker de sitegegevens wist. Weigert de browser opslaan (privémodus, vol), dan toont de app de melding *niet gelukt*. Gekozen boven een cookie omdat een cookie bij elk verzoek meegestuurd wordt, maar 4 KB groot is en voor niets op de server nodig is.
-- De beheerder (Roy): favorieten staan in de backend en zijn dus op elk apparaat gelijk (zie hieronder). Na inloggen wisselt de app van de lokale lijst naar de lijst uit de backend; lokale favorieten worden niet naar de backend gekopieerd.
-
-## Beheerder: login en favorieten in de backend
-
-- De app heeft geen eigen login. Hij vraagt bij het starten `GET /api/auth/session` (zelfde origin, dus het sessiecookie van het portfolio gaat mee): 200 met `{ username, roles, csrfToken }` en de rol `admin` betekent beheerder, 204 of een fout betekent bezoeker (`src/app/auth.service.ts`). Inloggen doe je in het portfolio (Start, Inloggen); na inloggen laad je de recepten-app opnieuw, dan gebruikt hij de favorieten uit de database in plaats van die uit de browser.
-- Favorieten staan in de backend (portfolio-repo, tabel `recipe_favorite`, migratie V8) en niet meer in `localStorage`: `GET /api/recipes/favorites` (lijst van slugs), `PUT` en `DELETE /api/recipes/favorites/{id}` met de header `X-CSRF-Token` uit de sessie (`src/app/favorites.service.ts`). Zonder login geven die endpoints 401, zonder CSRF-token 403, bij een onbekend recept 404. Mislukt opslaan, dan draait de app de ster terug en toont een melding.
-- De beveiliging zit in de backend (`@RolesAllowed("admin")`); de app vraagt alleen een favorietenlijst bij de backend als je beheerder bent.
-- Eerdere favorieten uit `localStorage` van de beheerder werden niet overgenomen in de backend; dezelfde sleutel `recipes.favorites` wordt nu door bezoekers gebruikt.
+- Alle bezoekers: favorieten staan in `localStorage` van de eigen browser onder de sleutel `recipes.favorites` (een JSON-lijst met recept-slugs, maximaal 500 gelezen). Er gaat niets naar de server, er is geen cookie en geen tracking; het is functionele opslag die de bezoeker zelf aanzet met de ster. De lijst is per browser en per apparaat en verdwijnt als de bezoeker de sitegegevens wist. Weigert de browser opslaan (privémodus, vol), dan toont de app de melding *niet gelukt*. Gekozen boven een cookie omdat een cookie bij elk verzoek meegestuurd wordt, maar 4 KB groot is en voor niets op de server nodig is.
+- Favorieten op de server bestaan niet meer: de beheerder-login en de endpoints `/api/recipes/favorites` zijn uit het portfolio verwijderd. Ook de beheerder gebruikt dus `localStorage` (`src/app/favorites.service.ts`).
 
 ## Naar je eigen Discord-server
 

@@ -4,7 +4,7 @@ Instructies voor mensen en AI-agents die in deze repository werken. Eigenaar: Ro
 
 ## Wat is dit
 
-Losse Angular-frontend (standalone components, signals, SCSS, Vitest) voor recepten. Backend, authenticatie en database staan in [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio); wijzigingen daaraan horen daar, niet hier. De app draait als statische site (nginx) en wordt in een iframe op `/apps/recipes/` in het portfolio geladen (zelfde origin). Daarom gebruikt `src/index.html` een relatieve `<base href="./">`; gebruik nooit absolute paden naar assets.
+Losse Angular-frontend (standalone components, signals, SCSS, Vitest) voor recepten. Backend en database staan in [`royhendriks-dev/portfolio`](https://github.com/royhendriks-dev/portfolio); wijzigingen daaraan horen daar, niet hier. De app draait als statische site (nginx) en wordt in een iframe op `/apps/recipes/` in het portfolio geladen (zelfde origin). Daarom gebruikt `src/index.html` een relatieve `<base href="./">`; gebruik nooit absolute paden naar assets.
 
 ## Commando's
 
@@ -21,7 +21,7 @@ npm run build       # productiebuild naar dist/recipes/browser
 - UI-teksten staan in `src/app/translations.ts` voor zowel `nl` als `en`; receptinhoud komt per taal uit de backend.
 - Geen secrets in de repo. `SONAR_TOKEN` staat als GitHub-secret.
 - Nooit beweren dat een test slaagde zonder dat hij gedraaid is.
-- Kleine, gerichte wijzigingen; geen nieuwe frameworks of auth in deze repo.
+- Kleine, gerichte wijzigingen; geen nieuwe frameworks en geen login in deze repo.
 - Discord (`src/app/discord.service.ts`): de app bewaart nooit een webhook of token en stuurt alleen `{recipe, lang, servings}` naar `/api/discord/share`; de webhook, het client secret en de limieten horen in de backend (zie README, *Naar je eigen Discord-server*). Koppelen opent altijd in een nieuw tabblad.
 
 ## Branches en mergen

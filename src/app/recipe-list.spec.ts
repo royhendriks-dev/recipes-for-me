@@ -2,13 +2,12 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { answerSession } from '../testing/auth';
 import { RECIPE_FIXTURES, RECIPE_SPARSE, toSummary } from '../testing/fixtures';
 import { I18nService } from './i18n.service';
 import { RecipeList } from './recipe-list';
 
 describe('RecipeList', () => {
-  async function setup(admin = false, favorites: string[] = [], local: string[] | null = null) {
+  async function setup(local: string[] | null = null) {
     localStorage.clear();
     if (local) {
       localStorage.setItem('recipes.favorites', JSON.stringify(local));
@@ -21,7 +20,6 @@ describe('RecipeList', () => {
     const fixture = TestBed.createComponent(RecipeList);
     fixture.detectChanges();
     const http = TestBed.inject(HttpTestingController);
-    await answerSession(http, admin, favorites);
     return { fixture, http, el: fixture.nativeElement as HTMLElement };
   }
 
@@ -69,22 +67,8 @@ describe('RecipeList', () => {
     expect(zoet?.getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('zet favoriete recepten bovenaan met een ster, alleen voor de beheerder', async () => {
-    const { fixture, http, el } = await setup(true, ['sparse']);
-    http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
-    await fixture.whenStable();
-    fixture.detectChanges();
-    const headings = Array.from(el.querySelectorAll('h2')).map((h) => h.textContent?.replace(/\s+/g, ' ').trim());
-    expect(headings).toEqual(['Favorieten (1)', 'Hoofdgerecht (1)', 'Zoet (1)']);
-    const first = el.querySelector('.section ul a.recipe');
-    expect(first?.querySelector('.title')?.textContent).toContain('Appeltaart');
-    expect(first?.querySelector('.star')).not.toBeNull();
-    expect(first?.querySelector('.visually-hidden')?.textContent).toContain('Favoriet');
-    expect(el.querySelectorAll('.star')).toHaveLength(2);
-  });
-
-  it('toont een bezoeker alleen de eigen lokale favorieten, zonder aanroep naar de backend', async () => {
-    const { fixture, http, el } = await setup(false, [], ['sparse']);
+  it('zet favoriete recepten bovenaan met een ster en toont alleen de eigen lokale favorieten, zonder aanroep naar de backend', async () => {
+    const { fixture, http, el } = await setup(['sparse']);
     http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
     await fixture.whenStable();
     fixture.detectChanges();
@@ -98,7 +82,7 @@ describe('RecipeList', () => {
   });
 
   it('toont zonder favorieten geen favorietenblok en geen sterren', async () => {
-    const { fixture, http, el } = await setup(false);
+    const { fixture, http, el } = await setup();
     http.expectOne((r) => r.url === '/api/recipes').flush([toSummary(RECIPE_FIXTURES.nl), toSummary(RECIPE_SPARSE)]);
     await fixture.whenStable();
     expect(Array.from(el.querySelectorAll('h2')).map((h) => h.textContent?.replace(/\s+/g, ' ').trim())).toEqual(['Hoofdgerecht (1)', 'Zoet (1)']);
